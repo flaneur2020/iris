@@ -1,3 +1,5 @@
+task :default => :run
+
 task :run => :build do
   sh "bin/main"
 end

@@ -4,6 +4,7 @@
 #define NTOKEN_SIZE 4096
 
 enum {
+    TK_EOF,
     TK_NUMBER = 1, 
     TK_STRING,
     TK_NAME,
@@ -16,14 +17,20 @@ enum {
     TK_WHILE,
     TK_BREAK,
     TK_CONTINUE,
+    TK_NEWLINE,
+    // 
+    TK_DIGITS,
+    TK_SPACES
 };
 
 typedef struct irlex {
+    char l_current;
     char l_buf[NTOKEN_SIZE];
     char l_buf_size;
     int  l_line;
     int  l_col;
     FILE *l_file;
+    char *l_path;
 } irlex_t;
 
 int irX_init(irlex_t *lp, char *path);
