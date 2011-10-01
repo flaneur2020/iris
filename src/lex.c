@@ -1,7 +1,13 @@
 #include "inc/iris.h"
 
 extern char *tkstr[] = {
-    [TK_EOF] = "EOF",
+    ['.'] = ".",
+    ['+'] = "+",
+    ['-'] = "-",
+    ['*'] = "*",
+    ['/'] = "/",
+    [':'] = ":",
+    [','] = ",",
     [TK_NUMBER] = "<number>",
     [TK_STRING] = "<string>",
     [TK_NAME]  = "NAME",
@@ -17,8 +23,11 @@ extern char *tkstr[] = {
     [TK_LOCAL] = "LOCAL"
 };
 
+
 #define irX_error(lp, fmt, ...) \
-    do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->l_path, lp->l_line, lp->l_col, ##__VA_ARGS__); exit(1); } while (0)
+    do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->l_path, (lp)->l_line, (lp)->l_col, ##__VA_ARGS__); exit(1); } while (0)
+
+/* ------------------------------------------ */
 
 int irX_init(irlex_t *lp, char *path) {
     FILE *fp;
@@ -53,26 +62,46 @@ int irX_next(irlex_t *lp) {
     int r;
 
     while((c = lp->l_current) != EOF && c != '\0') {
-        irX_reset_buf(lp);
+        irX_reset_buf(lp, 0);
         switch(c){
         case '\n':
         case '\r':
             irX_step(lp);
             return TK_NEWLINE;
+        case '<':
+            c = irX_step(lp);
+            if (c == '=')  
+                return TK_LTE;
+            return ;
+        case ',':
+        case '.':
+        case '+':
+        case '*':
+        case '/':
+        case '=':
+            irX_step(lp);
+            return c;
         case '\'':
         case '\"':
             irT_string(lp, c);
             return TK_STRING;
-        default:
-            if (isspace(c)) {
-                irT_spaces(lp);
-                continue;
-            }
-            if (isdigit(c)) {
-                irT_number(lp);
-                return TK_NUMBER;
-            }
+        case '-':
+            c = irX_step(lp);
+            if (c != '-')
+                return '-';
+            // else it's a comment
+            irX_step_until(lp, "\n\r");
+            continue;
         }
+        if (isspace(c)) {
+            irT_spaces(lp);
+            continue;
+        }
+        if (isdigit(c)) {
+            irT_number(lp);
+            return TK_NUMBER;
+        }
+        irX_error(lp, "unkown token: %c", c);
     }
     return 0;
 }
@@ -91,11 +120,15 @@ int irX_step(irlex_t *lp){
     return (lp->l_current = c);
 }
 
+int irX_step_until(irlex_t *lp, char *str){
+    while (!strchr(str, irX_step(lp)));
+}
+
 int irX_consume(irlex_t *lp, char c) {
     lp->l_buf[lp->l_buf_size++] = c;
 }
 
-int irX_reset_buf(irlex_t *lp){
+int irX_reset_buf(irlex_t *lp, int size){
     lp->l_buf_size = 0;
 }
 
@@ -109,7 +142,7 @@ int irX_getc(irlex_t *lp) {
 
 // digits { . digits }?
 char irT_number(irlex_t *lp){
-    char c;
+    char c = lp->l_current;
 
     irT_digits(lp);
     // if it's an decimal
@@ -174,7 +207,7 @@ char irT_spaces(irlex_t *lp) {
     char c = lp->l_current;
 
     if (!isspace(c)) 
-        return TK_SPACES;
+        return c;
     while (isspace(c)) {
         c = irX_step(lp);
     }

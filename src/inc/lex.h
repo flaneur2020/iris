@@ -4,10 +4,13 @@
 #define NTOKEN_SIZE 4096
 
 enum {
-    TK_EOF,
-    TK_NUMBER = 1, 
+    // terminal symbols
+    TK_NUMBER = 257,
     TK_STRING,
     TK_NAME,
+    // operators
+    TK_LTE,
+    // keywords
     TK_AND,
     TK_OR,
     TK_IF,
@@ -18,9 +21,6 @@ enum {
     TK_BREAK,
     TK_CONTINUE,
     TK_NEWLINE,
-    // 
-    TK_DIGITS,
-    TK_SPACES
 };
 
 extern char* tkstr[];
