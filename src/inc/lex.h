@@ -10,6 +10,8 @@ enum {
     TK_NAME,
     // operators
     TK_LTE,
+    TK_GTE,
+    TK_EQ,
     // keywords
     TK_AND,
     TK_OR,

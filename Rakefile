@@ -22,6 +22,10 @@ task :link => ofiles do
   sh "gcc #{ofiles * ' '} -o bin/main"
 end
 
+task :clean do
+  sh "rm -r bin/"
+end
+
 task :ctags do
   sh "ctags -R src"
 end 

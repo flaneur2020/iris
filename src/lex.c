@@ -1,6 +1,6 @@
 #include "inc/iris.h"
 
-extern char *tkstr[] = {
+char *tkstr[] = {
     ['.'] = ".",
     ['+'] = "+",
     ['-'] = "-",
@@ -8,6 +8,10 @@ extern char *tkstr[] = {
     ['/'] = "/",
     [':'] = ":",
     [','] = ",",
+    ['>'] = ">",
+    ['<'] = "<",
+    [TK_GTE] = "GTE",
+    [TK_LTE] = "LTE",
     [TK_NUMBER] = "<number>",
     [TK_STRING] = "<string>",
     [TK_NAME]  = "NAME",
@@ -63,29 +67,19 @@ int irX_next(irlex_t *lp) {
 
     while((c = lp->l_current) != EOF && c != '\0') {
         irX_reset_buf(lp, 0);
-        switch(c){
-        case '\n':
-        case '\r':
-            irX_step(lp);
-            return TK_NEWLINE;
-        case '<':
+        if (c == '<') {
             c = irX_step(lp);
             if (c == '=')  
                 return TK_LTE;
-            return ;
-        case ',':
-        case '.':
-        case '+':
-        case '*':
-        case '/':
-        case '=':
-            irX_step(lp);
-            return c;
-        case '\'':
-        case '\"':
-            irT_string(lp, c);
-            return TK_STRING;
-        case '-':
+            return '<';
+        }
+        if (c == '>') {
+            c = irX_step(lp);
+            if (c == '=')  
+                return TK_GTE;
+            return '>';
+        }
+        if (c == '-') {
             c = irX_step(lp);
             if (c != '-')
                 return '-';
@@ -93,10 +87,35 @@ int irX_next(irlex_t *lp) {
             irX_step_until(lp, "\n\r");
             continue;
         }
+        // assign or eual
+        if (c == '=') {
+            c = irX_step(lp);
+            if (c != '=')
+                return '=';
+            irX_step(lp);
+            return TK_EQ;
+        }
+        // newline
+        if (strchr("\n\r", c)) {
+            irX_step(lp);
+            return TK_NEWLINE;
+        }
+        // skip the whitespaces
         if (isspace(c)) {
             irT_spaces(lp);
             continue;
         }
+        // single character operators
+        if (strchr(",.+:*/", c)) {
+            irX_step(lp);
+            return c;
+        }
+        // string
+        if (strchr("\"\'", c)) {
+            irT_string(lp, c);
+            return TK_STRING;
+        }
+        //
         if (isdigit(c)) {
             irT_number(lp);
             return TK_NUMBER;
