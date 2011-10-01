@@ -1,7 +1,24 @@
 #include "inc/iris.h"
 
+extern char *tkstr[] = {
+    [TK_EOF] = "EOF",
+    [TK_NUMBER] = "<number>",
+    [TK_STRING] = "<string>",
+    [TK_NAME]  = "NAME",
+    [TK_AND] = "AND",
+    [TK_OR] = "OR",
+    [TK_IF] = "IF", 
+    [TK_NIL] = "NIL",
+    [TK_FOR] = "FOR",
+    [TK_WHILE] = "WHILE",
+    [TK_BREAK] = "BREAK",
+    [TK_CONTINUE] = "CONTINUE",
+    [TK_NEWLINE] = "NEWLINE",
+    [TK_LOCAL] = "LOCAL"
+};
+
 #define irX_error(lp, fmt, ...) \
-    do { fprintf(stderr, "Lex Error: %s:%d:%d" fmt, lp->l_path, lp->l_line, lp->l_col, ##__VA_ARGS__); exit(1); } while (0)
+    do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->l_path, lp->l_line, lp->l_col, ##__VA_ARGS__); exit(1); } while (0)
 
 int irX_init(irlex_t *lp, char *path) {
     FILE *fp;
@@ -35,11 +52,12 @@ int irX_next(irlex_t *lp) {
     char c;
     int r;
 
-    irX_reset_buf(lp);
     while((c = lp->l_current) != EOF && c != '\0') {
+        irX_reset_buf(lp);
         switch(c){
         case '\n':
         case '\r':
+            irX_step(lp);
             return TK_NEWLINE;
         case '\'':
         case '\"':
@@ -97,8 +115,9 @@ char irT_number(irlex_t *lp){
     // if it's an decimal
     if ((c = lp->l_current) == '.') {
         irX_consume(lp, c);
-        irX_digits(lp);
+        irT_digits(lp);
     }
+    irX_consume(lp, '\0');
     return c;
 }
 
@@ -125,7 +144,7 @@ char irT_string(irlex_t *lp, char qc) {
         case '\0':
         case '\n':
         case '\r':
-            irX_error("unfinished string");
+            irX_error(lp, "unfinished string");
         case '\\':
             switch(c = irX_step(lp)) {
             case 'n': irX_consume(lp, '\n'); break;
@@ -141,10 +160,12 @@ char irT_string(irlex_t *lp, char qc) {
             // go through
             case '\n':
             case '\r': irX_consume(lp, '\n'); break;
-            default: 
             }
+        default:
+            irX_consume(lp, c);
         }
     }
+    irX_step(lp);
     return c;
 }
 
@@ -157,7 +178,7 @@ char irT_spaces(irlex_t *lp) {
     while (isspace(c)) {
         c = irX_step(lp);
     }
-    return c:
+    return c;
 }
 
 /* ----------------------------- */

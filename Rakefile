@@ -4,7 +4,7 @@ task :run => :build do
   sh "bin/main"
 end
 
-task :build => :link
+task :build => [:link, :ctags]
 
 mkdir_p 'bin'
 
@@ -21,3 +21,7 @@ end
 task :link => ofiles do
   sh "gcc #{ofiles * ' '} -o bin/main"
 end
+
+task :ctags do
+  sh "ctags -R src"
+end 

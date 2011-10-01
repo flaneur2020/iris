@@ -23,6 +23,10 @@ enum {
     TK_SPACES
 };
 
+extern char* tkstr[];
+
+#define TKSTR(tk) (tkstr[(tk)])
+
 typedef struct irlex {
     char l_current;
     char l_buf[NTOKEN_SIZE];
@@ -38,8 +42,13 @@ int irX_next(irlex_t *lp);
 int irX_close(irlex_t *lp);
 int irX_error(irlex_t *lp);
 
-int irX_consume(irlex_t *lp);
+int irX_consume(irlex_t *lp, char c);
 int irX_getc(irlex_t *lp);
 int irX_ungetc(irlex_t *lp);
+
+char irT_number(irlex_t *lp);
+char irT_string(irlex_t *lp, char qc);
+char irT_spaces(irlex_t *lp);
+char irT_digits(irlex_t *lp);
 
 #endif
