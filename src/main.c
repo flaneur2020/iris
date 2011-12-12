@@ -1,7 +1,7 @@
 #include "inc/iris.h"
 
 int main(int argc, char **argv) {
-    ir_lex_t lex;
+    IrLex lex;
     int tk;
     char *path = "test/sample.lua";
 

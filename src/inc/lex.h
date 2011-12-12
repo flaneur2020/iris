@@ -29,7 +29,7 @@ extern char* tkstr[];
 
 #define TKSTR(tk) (tkstr[(tk)])
 
-typedef struct ir_lex {
+typedef struct IrLex {
     char l_current;
     char l_buf[NTOKEN_SIZE];
     char l_buf_size;
@@ -37,20 +37,20 @@ typedef struct ir_lex {
     int  l_col;
     FILE *l_file;
     char *l_path;
-} ir_lex_t;
+} IrLex;
 
-int ir_lex_init(ir_lex_t *lp, char *path);
-int ir_lex_next(ir_lex_t *lp);
-int ir_lex_close(ir_lex_t *lp);
-int ir_lex_error(ir_lex_t *lp);
+int ir_lex_init(IrLex *lp, char *path);
+int ir_lex_next(IrLex *lp);
+int ir_lex_close(IrLex *lp);
+int ir_lex_error(IrLex *lp);
 
-int ir_lex_consume(ir_lex_t *lp, char c);
-int ir_lex_getc(ir_lex_t *lp);
-int ir_lex_ungetc(ir_lex_t *lp);
+int ir_lex_consume(IrLex *lp, char c);
+int ir_lex_getc(IrLex *lp);
+int ir_lex_ungetc(IrLex *lp);
 
-char ir_lex_number(ir_lex_t *lp);
-char ir_lex_string(ir_lex_t *lp, char qc);
-char ir_lex_spaces(ir_lex_t *lp);
-char ir_lex_digits(ir_lex_t *lp);
+char ir_lex_number(IrLex *lp);
+char ir_lex_string(IrLex *lp, char qc);
+char ir_lex_spaces(IrLex *lp);
+char ir_lex_digits(IrLex *lp);
 
 #endif

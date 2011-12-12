@@ -10,10 +10,10 @@ enum {
     TObject
 };
 
-typedef struct ir_object {
-    unsigned int type;
-    unsigned int flag;
-    struct IrObject *gc_next;
-} ir_object_t;
+typedef struct IrObject {
+    unsigned int o_type;
+    unsigned int o_flag;
+    struct IrObject *o_gc_next;
+} IrObject;
 
 #endif

@@ -33,7 +33,7 @@ char *tkstr[] = {
 
 /* ------------------------------------------ */
 
-int ir_lex_init(ir_lex_t *lp, char *path) {
+int ir_lex_init(IrLex *lp, char *path) {
     FILE *fp;
 
     // open file
@@ -52,7 +52,7 @@ int ir_lex_init(ir_lex_t *lp, char *path) {
     ir_lex_step(lp);
 }
 
-int ir_lex_close(ir_lex_t *lp) {
+int ir_lex_close(IrLex *lp) {
     fclose(lp->l_file);
 }
 
@@ -61,7 +61,7 @@ int ir_lex_close(ir_lex_t *lp) {
 // Fetch one token each time, returns the type of token,
 // and store the content of this token into lp->l_buf[].
 // On fetching finished, returns 0.
-int ir_lex_next(ir_lex_t *lp) {
+int ir_lex_next(IrLex *lp) {
     char c;
     int r;
 
@@ -125,7 +125,7 @@ int ir_lex_next(ir_lex_t *lp) {
     return 0;
 }
 
-int ir_lex_step(ir_lex_t *lp){
+int ir_lex_step(IrLex *lp){
     char c;
 
     c = ir_lex_getc(lp);
@@ -139,28 +139,28 @@ int ir_lex_step(ir_lex_t *lp){
     return (lp->l_current = c);
 }
 
-int ir_lex_step_until(ir_lex_t *lp, char *str){
+int ir_lex_step_until(IrLex *lp, char *str){
     while (!strchr(str, ir_lex_step(lp)));
 }
 
-int ir_lex_consume(ir_lex_t *lp, char c) {
+int ir_lex_consume(IrLex *lp, char c) {
     lp->l_buf[lp->l_buf_size++] = c;
 }
 
-int ir_lex_reset_buf(ir_lex_t *lp, int size){
+int ir_lex_reset_buf(IrLex *lp, int size){
     lp->l_buf_size = 0;
 }
 
 /* -------------------------------------------- */
 
-int ir_lex_getc(ir_lex_t *lp) {
+int ir_lex_getc(IrLex *lp) {
     return fgetc(lp->l_file);
 }
 
 /* -------------------------------------------- */
 
 // digits { . digits }?
-char ir_lex_number(ir_lex_t *lp){
+char ir_lex_number(IrLex *lp){
     char c = lp->l_current;
 
     ir_lex_digits(lp);
@@ -174,7 +174,7 @@ char ir_lex_number(ir_lex_t *lp){
 }
 
 // \d+
-char ir_lex_digits(ir_lex_t *lp) {
+char ir_lex_digits(IrLex *lp) {
     char c = lp->l_current;
     
     if (!isdigit(c)) 
@@ -187,7 +187,7 @@ char ir_lex_digits(ir_lex_t *lp) {
 }
 
 // ' '
-char ir_lex_string(ir_lex_t *lp, char qc) {
+char ir_lex_string(IrLex *lp, char qc) {
     char c = lp->l_current;
 
     while ((c = ir_lex_step(lp)) != qc) {
@@ -222,7 +222,7 @@ char ir_lex_string(ir_lex_t *lp, char qc) {
 }
 
 // \s*
-char ir_lex_spaces(ir_lex_t *lp) {
+char ir_lex_spaces(IrLex *lp) {
     char c = lp->l_current;
 
     if (!isspace(c)) 
