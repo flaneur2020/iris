@@ -30,13 +30,13 @@ extern char* tkstr[];
 #define TKSTR(tk) (tkstr[(tk)])
 
 typedef struct IrLex {
-    char l_current;
-    char l_buf[NTOKEN_SIZE];
-    char l_buf_size;
-    int  l_line;
-    int  l_col;
-    FILE *l_file;
-    char *l_path;
+    char current;
+    char buf[NTOKEN_SIZE];
+    char buf_size;
+    int  line;
+    int  col;
+    FILE *file;
+    char *path;
 } IrLex;
 
 int ir_lex_init(IrLex *lp, char *path);

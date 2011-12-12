@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ir.h"
+#include "vm.h"
 #include "lex.h"
 #include "object.h"
 

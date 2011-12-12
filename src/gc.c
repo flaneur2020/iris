@@ -14,7 +14,7 @@ IrObject* ir_gc_malloc(IrVM *vm, size_t size) {
 int ir_gc_free(IrObject *obj){
 }
 
-int ir_gc_link(IrObject *obj, IrObject *obj_child) {
+int ir_gc_mark(IrObject *obj) {
 }
 
 int ir_gc_collect(IrVM *vm) {

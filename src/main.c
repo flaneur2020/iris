@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     ir_lex_init(&lex, path);
     while ((tk = ir_lex_next(&lex)) > 0) {
         if (TKSTR(tk)[0] == '<') 
-            printf("%s %s\n", TKSTR(tk), lex.l_buf);
+            printf("%s %s\n", TKSTR(tk), lex.buf);
         else 
             printf("%s \n", TKSTR(tk));
     }
