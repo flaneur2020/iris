@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ir.h"
 #include "lex.h"
+#include "object.h"
 
 #endif
