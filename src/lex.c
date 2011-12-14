@@ -120,7 +120,7 @@ int ir_lex_next(IrLex *lp) {
             ir_lex_number(lp);
             return TK_NUMBER;
         }
-        ir_lex_error(lp, "unkown token: %c", c);
+        ir_log(lp, "unkown token: %c", c);
     }
     return 0;
 }
@@ -178,7 +178,7 @@ char ir_lex_digits(IrLex *lp) {
     char c = lp->current;
     
     if (!isdigit(c)) 
-        ir_lex_error(lp, "number expected, but got: %c", c);
+        ir_log(lp, "number expected, but got: %c", c);
     while (isdigit(c)) {
         ir_lex_consume(lp, c);
         c = ir_lex_step(lp);
@@ -196,7 +196,7 @@ char ir_lex_string(IrLex *lp, char qc) {
         case '\0':
         case '\n':
         case '\r':
-            ir_lex_error(lp, "unfinished string");
+            ir_log(lp, "unfinished string");
         case '\\':
             switch(c = ir_lex_step(lp)) {
             case 'n': ir_lex_consume(lp, '\n'); break;
