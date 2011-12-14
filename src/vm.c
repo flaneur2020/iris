@@ -7,7 +7,6 @@ IrVM* ir_vm_new() {
     
     vm = malloc(sizeof(IrVM));
     memset(vm, 0, sizeof(IrVM));
-    vm->gcstat = GC_READY;
     vm->freeslots.next = NULL;
     return vm;
 }

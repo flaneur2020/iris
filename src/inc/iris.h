@@ -19,13 +19,18 @@ static inline unsigned long get_stack_pointer(){
     return p;
 }
 
+IrVM* ir_vm_new();
+int ir_vm_free(IrVM *vm);
+
 int ir_heap_init(IrVM *vm);
 int ir_heap_grow(IrVM *vm);
 
 IrObject* ir_gc_newobj(IrVM *vm, int type);
 int ir_gc_free(IrVM *vm, IrObject *obj);
 int ir_gc_mark(IrObject *obj);
+int ir_gc_mark_stack(IrVM *vm);
 int ir_gc_collect(IrVM *vm);
+int is_pointer_to_heap(IrVM *vm, VALUE p);
 
 int ir_lex_init(IrLex *lp, char *path);
 int ir_lex_next(IrLex *lp);

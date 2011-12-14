@@ -3,8 +3,6 @@
 int ir_heap_init(IrVM *vm);
 int ir_heap_grow(IrVM *vm);
 
-static inline int is_pointer_to_heap(IrVM *vm, VALUE p);
-
 /* ------------------------------------------------- */
 
 int ir_heap_init(IrVM *vm) {
@@ -35,6 +33,8 @@ int ir_heap_grow(IrVM *vm) {
     vm->heaps[nheaps].start = (unsigned long)mem;
     vm->heaps[nheaps].size = heap_size;
     vm->heaps_count++;
+    ir_log("new heap: start: %lx\n", (unsigned long)mem);
+    ir_log("new heap: end: %lx\n", (unsigned long)mem + heap_size);
     // resolve the heap into the fixed-size slots, and prepend them
     // all into the freeslots
     slots = (IrSlot*)mem;
@@ -57,7 +57,7 @@ IrObject* ir_gc_newobj(IrVM *vm, int type){
     IrObject *obj;
     
     if (vm->freeslots.next == NULL) {
-        ir_log("no free memory now, trying gc & grow the heap");
+        ir_log("no free memory now, trying gc & grow the heap\n");
         ir_gc_collect(vm);
         ir_heap_grow(vm);
     }
@@ -80,13 +80,14 @@ int ir_gc_free(IrVM *vm, IrObject *obj){
 }
 
 // 
-static inline int is_pointer_to_heap(IrVM *vm, VALUE p){
+int is_pointer_to_heap(IrVM *vm, VALUE p){
     int i;
     IrHeap *heap;
 
-    if ((p & ~3) != 0) {
+    if ((p & 3) != 0) {
         return 0;
     }
+
     for (i=0; i<vm->heaps_count; i++) {
         heap = &vm->heaps[i];
         if ((p >= heap->start) && (p < heap->start + heap->size)) {
@@ -96,8 +97,28 @@ static inline int is_pointer_to_heap(IrVM *vm, VALUE p){
     return 0;
 }
 
-// tranverse the stack as root
+// mark an object recursively.
 int ir_gc_mark(IrObject *obj) {
+    ir_log("ir_gc_mark: obj: %lx\n", (VALUE)obj);
+    obj->flag |= FL_MARK;
+    return 0;
+}
+
+//
+int ir_gc_mark_stack(IrVM *vm){
+    unsigned long stack_top;
+    VALUE *sp;
+    VALUE val;
+
+    stack_top = get_stack_pointer();
+    ir_log("ir_gc_mark_stack: stack size: %lu bytes\n", ir_stack_start - stack_top);
+    ir_log("ir_gc_mark_stack: stack range: %lx - %lx\n", stack_top, ir_stack_start);
+    //
+    for (sp=(VALUE*)stack_top; sp<(VALUE*)ir_stack_start; sp++) {
+        val = *sp;
+        if (! is_pointer_to_heap(vm, val))
+            continue;
+    }
     return 0;
 }
 
