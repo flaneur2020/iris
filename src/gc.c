@@ -118,6 +118,7 @@ int ir_gc_mark_stack(IrVM *vm){
         val = *sp;
         if (! is_pointer_to_heap(vm, val))
             continue;
+        ir_gc_mark((IrObject*)val);
     }
     return 0;
 }

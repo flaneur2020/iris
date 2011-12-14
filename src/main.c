@@ -15,6 +15,8 @@ int ir_main(int argc, char **argv) {
     }
 
     obj = ir_gc_newobj(vm, T_ARRAY);
+    printf("ref in stack: %lx\n", (VALUE)&obj);
+    printf("obj in heap:  %lx\n", (VALUE)obj);
     ir_gc_mark_stack(vm);
     return 0;
 
