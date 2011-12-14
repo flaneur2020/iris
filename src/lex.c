@@ -50,10 +50,12 @@ int ir_lex_init(IrLex *lp, char *path) {
     lp->current = '\0';
     // read the first char
     ir_lex_step(lp);
+    return 0;
 }
 
 int ir_lex_close(IrLex *lp) {
     fclose(lp->file);
+    return 0;
 }
 
 /* --------------------------------------------- */
@@ -63,7 +65,6 @@ int ir_lex_close(IrLex *lp) {
 // On fetching finished, returns 0.
 int ir_lex_next(IrLex *lp) {
     char c;
-    int r;
 
     while((c = lp->current) != EOF && c != '\0') {
         ir_lex_reset_buf(lp, 0);
@@ -120,7 +121,7 @@ int ir_lex_next(IrLex *lp) {
             ir_lex_number(lp);
             return TK_NUMBER;
         }
-        ir_log(lp, "unkown token: %c", c);
+        ir_lex_error(lp, "unkown token: %c", c);
     }
     return 0;
 }
@@ -141,14 +142,17 @@ int ir_lex_step(IrLex *lp){
 
 int ir_lex_step_until(IrLex *lp, char *str){
     while (!strchr(str, ir_lex_step(lp)));
+    return 0;
 }
 
 int ir_lex_consume(IrLex *lp, char c) {
     lp->buf[lp->buf_size++] = c;
+    return 0;
 }
 
 int ir_lex_reset_buf(IrLex *lp, int size){
     lp->buf_size = 0;
+    return 0;
 }
 
 /* -------------------------------------------- */
@@ -178,7 +182,7 @@ char ir_lex_digits(IrLex *lp) {
     char c = lp->current;
     
     if (!isdigit(c)) 
-        ir_log(lp, "number expected, but got: %c", c);
+        ir_lex_error(lp, "number expected, but got: %c", c);
     while (isdigit(c)) {
         ir_lex_consume(lp, c);
         c = ir_lex_step(lp);
@@ -196,7 +200,7 @@ char ir_lex_string(IrLex *lp, char qc) {
         case '\0':
         case '\n':
         case '\r':
-            ir_log(lp, "unfinished string");
+            ir_lex_error(lp, "unfinished string");
         case '\\':
             switch(c = ir_lex_step(lp)) {
             case 'n': ir_lex_consume(lp, '\n'); break;

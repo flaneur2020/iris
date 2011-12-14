@@ -1,9 +1,15 @@
 #include "inc/iris.h"
 
+int ir_heap_init(IrVM *vm);
+int ir_heap_grow(IrVM *vm);
+
+static inline int is_pointer_to_heap(IrVM *vm, VALUE p);
+
 /* ------------------------------------------------- */
 
 int ir_heap_init(IrVM *vm) {
     ir_heap_grow(vm);
+    return 0;
 }
 
 int ir_heap_grow(IrVM *vm) {
@@ -26,7 +32,7 @@ int ir_heap_grow(IrVM *vm) {
         heap_size = vm->heaps[nheaps-1].size * HEAP_INCREMENT_FACTOR;
     mem = malloc(heap_size);
     assert(mem != NULL);
-    vm->heaps[nheaps].start = mem;
+    vm->heaps[nheaps].start = (unsigned long)mem;
     vm->heaps[nheaps].size = heap_size;
     vm->heaps_count++;
     // resolve the heap into the fixed-size slots, and prepend them
@@ -92,7 +98,9 @@ static inline int is_pointer_to_heap(IrVM *vm, VALUE p){
 
 // tranverse the stack as root
 int ir_gc_mark(IrObject *obj) {
+    return 0;
 }
 
 int ir_gc_collect(IrVM *vm) {
+    return 0;
 }

@@ -1,12 +1,6 @@
 #include "inc/iris.h"
 
-int main(int argc, char **argv) {
-    printf("stack pointer: %lu", get_stack_pointer());
-    return 0;
-    //ir_run(argc, argv);
-}
-
-int ir_run(int argc, char **argv) {
+int ir_main(int argc, char **argv) {
     IrLex lex;
     int tk;
     char *path = "test/sample.lua";
@@ -19,5 +13,11 @@ int ir_run(int argc, char **argv) {
             printf("%s \n", TKSTR(tk));
     }
     
+    return 0;
+}
+
+int main(int argc, char **argv) {
+    printf("stack pointer: %lu", get_stack_pointer());
+    ir_main(argc, argv);
     return 0;
 }

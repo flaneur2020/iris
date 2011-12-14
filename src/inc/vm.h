@@ -19,9 +19,4 @@ typedef struct IrState {
     IrVM *vm;
 } IrState;
 
-IrObject* ir_gc_malloc(IrVM *ir, size_t size);
-int ir_gc_mark(IrObject *obj);
-int ir_gc_collect(IrVM *vm);
-
-
 #endif

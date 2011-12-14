@@ -2,6 +2,7 @@
 #define GC_H
 
 #include "object.h"
+#include "vm.h"
 
 typedef union IrSlot {
     union IrSlot *next;

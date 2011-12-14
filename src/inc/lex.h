@@ -32,25 +32,11 @@ extern char* tkstr[];
 typedef struct IrLex {
     char current;
     char buf[NTOKEN_SIZE];
-    char buf_size;
+    int  buf_size;
     int  line;
     int  col;
     FILE *file;
     char *path;
 } IrLex;
-
-int ir_lex_init(IrLex *lp, char *path);
-int ir_lex_next(IrLex *lp);
-int ir_lex_close(IrLex *lp);
-int ir_lex_error(IrLex *lp);
-
-int ir_lex_consume(IrLex *lp, char c);
-int ir_lex_getc(IrLex *lp);
-int ir_lex_ungetc(IrLex *lp);
-
-char ir_lex_number(IrLex *lp);
-char ir_lex_string(IrLex *lp, char qc);
-char ir_lex_spaces(IrLex *lp);
-char ir_lex_digits(IrLex *lp);
 
 #endif
