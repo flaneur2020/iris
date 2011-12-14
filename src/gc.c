@@ -84,10 +84,11 @@ int is_pointer_to_heap(IrVM *vm, VALUE p){
     int i;
     IrHeap *heap;
 
+    // check alignment
     if ((p & 3) != 0) {
         return 0;
     }
-
+    // heap
     for (i=0; i<vm->heaps_count; i++) {
         heap = &vm->heaps[i];
         if ((p >= heap->start) && (p < heap->start + heap->size)) {
@@ -99,6 +100,8 @@ int is_pointer_to_heap(IrVM *vm, VALUE p){
 
 // mark an object recursively.
 int ir_gc_mark(IrObject *obj) {
+    if (obj->flag & FL_MARK)  
+        return 0;
     ir_log("ir_gc_mark: obj: %lx\n", (VALUE)obj);
     obj->flag |= FL_MARK;
     return 0;
