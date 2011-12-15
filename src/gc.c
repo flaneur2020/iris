@@ -15,7 +15,7 @@ int ir_heap_grow(IrVM *vm) {
     int heap_size;
     int nslots;
     void *mem;
-    IrSlot *slots;
+    IrSlotBody *slot_bodies;
     IrSlot *slot;
     IrSlot *freeslots;
     int i;
@@ -37,11 +37,12 @@ int ir_heap_grow(IrVM *vm) {
     ir_log("new heap: end: %lx\n", (unsigned long)mem + heap_size);
     // resolve the heap into the fixed-size slots, and prepend them
     // all into the freeslots
-    slots = (IrSlot*)mem;
-    nslots = heap_size / sizeof(IrSlot);
+    slot_bodies = (IrSlotBody*)mem;
+    nslots = heap_size / sizeof(IrSlotBody);
     freeslots = &vm->freeslots;
     for (i=0; i<nslots; i++) {
-        slot = &slots[i];
+        slot = (IrSlot*)&slot_bodies[i];
+        slot->ohead.type = T_NONE;
         slot->next = freeslots->next;
         freeslots->next = slot;
     }
@@ -65,7 +66,7 @@ IrObject* ir_gc_newobj(IrVM *vm, int type){
     vm->freeslots.next = slot->next;
     // 
     memset(slot, 0, sizeof(IrSlot));
-    obj = (IrObject*)&slot->data;
+    obj = (IrObject*)slot;
     obj->type = type;
     return obj;
 }
@@ -74,6 +75,7 @@ int ir_gc_free(IrVM *vm, IrObject *obj){
     IrSlot *slot;
     
     slot = (IrSlot*)obj;
+    slot->ohead.type = T_NONE;
     slot->next = vm->freeslots.next;
     vm->freeslots.next = slot;
     return 0;

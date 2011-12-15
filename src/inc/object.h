@@ -4,13 +4,14 @@
 typedef unsigned long VALUE;
 
 enum {
+    T_NONE = 0,
     T_ARRAY = 1,
     T_STRING = 2
 };
 
 typedef struct IrObject {
-    unsigned int type;
-    unsigned int flag;
+    unsigned short type;
+    unsigned short flag;
 } IrObject;
 
 #define FL_MARK 1

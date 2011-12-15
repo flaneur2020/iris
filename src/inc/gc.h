@@ -4,13 +4,16 @@
 #include "object.h"
 #include "vm.h"
 
-typedef union IrSlot {
-    union IrSlot *next;
-    union {
-        struct IrArray array;
-        struct IrString string;
-    } data;
+typedef struct IrSlot {
+    IrObject ohead;
+    struct IrSlot *next;
 } IrSlot;
+
+typedef union IrSlotBody {
+    IrSlot slot;
+    IrArray array;
+    IrString string;
+} IrSlotBody;
 
 typedef struct IrHeap {
     unsigned long start;
