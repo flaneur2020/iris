@@ -6,6 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
+#include <setjmp.h>
 
 #include "vm.h"
 #include "lex.h"

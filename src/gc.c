@@ -112,7 +112,11 @@ int ir_gc_mark_stack(IrVM *vm){
     unsigned long stack_top;
     VALUE *sp;
     VALUE val;
-
+    jmp_buf jbuf;
+    
+    // save the current regisiters into stack
+    setjmp(jbuf);
+    // 
     stack_top = get_stack_pointer();
     ir_log("ir_gc_mark_stack: stack size: %lu bytes\n", ir_stack_start - stack_top);
     ir_log("ir_gc_mark_stack: stack range: %lx - %lx\n", stack_top, ir_stack_start);
@@ -126,6 +130,10 @@ int ir_gc_mark_stack(IrVM *vm){
     return 0;
 }
 
-int ir_gc_collect(IrVM *vm) {
+int ir_gc_collect(IrVM *vm){
+    return 0;
+}
+
+int ir_gc_sweep(IrVM *vm){
     return 0;
 }
