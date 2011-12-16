@@ -10,11 +10,15 @@ char *tkstr[] = {
     [','] = ",",
     ['>'] = ">",
     ['<'] = "<",
+    ['{'] = "{",
+    ['}'] = "}",
+    ['('] = "(",
+    [')'] = ")",
     [TK_GTE] = "GTE",
     [TK_LTE] = "LTE",
     [TK_NUMBER] = "<number>",
     [TK_STRING] = "<string>",
-    [TK_NAME]  = "NAME",
+    [TK_NAME]  = "<name>",
     [TK_AND] = "AND",
     [TK_OR] = "OR",
     [TK_IF] = "IF", 
@@ -26,7 +30,6 @@ char *tkstr[] = {
     [TK_NEWLINE] = "NEWLINE",
     [TK_LOCAL] = "LOCAL"
 };
-
 
 #define ir_lex_error(lp, fmt, ...) \
     do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->path, (lp)->line, (lp)->col, ##__VA_ARGS__); exit(1); } while (0)
@@ -106,8 +109,8 @@ int ir_lex_next(IrLex *lp) {
             ir_lex_spaces(lp);
             continue;
         }
-        // single character operators
-        if (strchr(",.+:*/", c)) {
+        // single character tokens
+        if (strchr(",.+:*/{}()", c)) {
             ir_lex_step(lp);
             return c;
         }
@@ -120,6 +123,11 @@ int ir_lex_next(IrLex *lp) {
         if (isdigit(c)) {
             ir_lex_number(lp);
             return TK_NUMBER;
+        }
+        // keyword
+        if (isalpha(c)) {
+            ir_lex_name(lp);
+            return TK_NAME;
         }
         ir_lex_error(lp, "unkown token: %c", c);
     }
@@ -187,7 +195,25 @@ char ir_lex_digits(IrLex *lp) {
         ir_lex_consume(lp, c);
         c = ir_lex_step(lp);
     }
+    ir_lex_consume(lp, '\0');
+    if (isalpha(c)) {
+        ir_lex_error(lp, "malformed number near %s, expected number, but got: %c", lp->buf, c);
+    }
     return c;
+}
+
+// \w[\d]
+char ir_lex_name(IrLex *lp){
+    char c = lp->current;
+
+    if (!isalpha(c))  
+        return c;
+    while(isalpha(c) || isdigit(c)){
+        ir_lex_consume(lp, c);
+        c = ir_lex_step(lp);
+    }
+    ir_lex_consume(lp, '\0');
+    return 0;
 }
 
 // ' '
@@ -222,6 +248,7 @@ char ir_lex_string(IrLex *lp, char qc) {
         }
     }
     ir_lex_step(lp);
+    ir_lex_consume(lp, '\0');
     return c;
 }
 

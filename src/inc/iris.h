@@ -46,6 +46,7 @@ int ir_lex_getc(IrLex *lp);
 int ir_lex_ungetc(IrLex *lp);
 int ir_lex_reset_buf(IrLex *lp, int size);
 
+char ir_lex_name(IrLex *lp);
 char ir_lex_number(IrLex *lp);
 char ir_lex_string(IrLex *lp, char qc);
 char ir_lex_spaces(IrLex *lp);

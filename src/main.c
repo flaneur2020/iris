@@ -3,24 +3,8 @@
 
 int ir_main(int argc, char **argv) {
     IrLex lex;
-    IrVM *vm;
     int tk;
     char *path = "test/sample.lua";
-    int i;
-    IrObject *obj, *obj2;
-
-    vm = ir_vm_new();
-    for (i=0; i<10; i++) {
-        ir_gc_newobj(vm, T_ARRAY);
-    }
-
-    obj = ir_gc_newobj(vm, T_ARRAY);
-    obj2 = ir_gc_newobj(vm, T_ARRAY);
-    printf("ref in stack: %lx\n", (VALUE)&obj);
-    printf("obj in heap:  %lx\n", (VALUE)obj);
-    ir_gc_collect(vm);
-
-    return 0;
 
     ir_lex_init(&lex, path);
     while ((tk = ir_lex_next(&lex)) > 0) {
