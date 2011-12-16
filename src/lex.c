@@ -14,6 +14,7 @@ char *tkstr[] = {
     ['}'] = "}",
     ['('] = "(",
     [')'] = ")",
+    [TK_NEWLINE] = "NEWLINE",
     [TK_GTE] = "GTE",
     [TK_LTE] = "LTE",
     [TK_NUMBER] = "<number>",
@@ -27,11 +28,14 @@ char *tkstr[] = {
     [TK_WHILE] = "while",
     [TK_BREAK] = "break",
     [TK_CONTINUE] = "continue",
-    [TK_NEWLINE] = "newline",
-    [TK_LOCAL] = "local"
+    [TK_LOCAL] = "local",
+    [TK_FUNCTION] = "function"
 };
 
-static int tkkeywords[] = { TK_AND, TK_OR, TK_IF, TK_LOCAL, TK_NIL, TK_FOR, TK_WHILE, TK_BREAK, TK_CONTINUE };
+static int tkkeywords[] = { 
+    TK_AND, TK_OR, TK_IF, TK_LOCAL, TK_NIL, 
+    TK_FOR, TK_WHILE, TK_BREAK, TK_CONTINUE, TK_FUNCTION 
+};
 
 // a reverse associated map of kwstr[];
 static st_table *kwtab = NULL;
@@ -85,6 +89,8 @@ int ir_lex_close(IrLex *lp) {
 // On fetching finished, returns 0.
 int ir_lex_next(IrLex *lp) {
     char c;
+    int r;
+    int tk;
 
     while((c = lp->current) != EOF && c != '\0') {
         ir_lex_reset_buf(lp, 0);
@@ -144,6 +150,10 @@ int ir_lex_next(IrLex *lp) {
         // keyword
         if (isalpha(c)) {
             ir_lex_name(lp);
+            r = st_lookup(kwtab, (st_data_t)lp->buf, (st_data_t*)&tk);
+            if (r) {
+                return tk;
+            }
             return TK_NAME;
         }
         ir_lex_error(lp, "unkown token: %c", c);
@@ -219,7 +229,7 @@ char ir_lex_digits(IrLex *lp) {
     return c;
 }
 
-// \w[\d]
+// \w[\d\w]*
 char ir_lex_name(IrLex *lp){
     char c = lp->current;
 
@@ -231,6 +241,18 @@ char ir_lex_name(IrLex *lp){
     }
     ir_lex_consume(lp, '\0');
     return 0;
+}
+
+// \s*
+char ir_lex_spaces(IrLex *lp) {
+    char c = lp->current;
+
+    if (!isspace(c)) 
+        return c;
+    while (isspace(c)) {
+        c = ir_lex_step(lp);
+    }
+    return c;
 }
 
 // ' '
@@ -266,18 +288,6 @@ char ir_lex_string(IrLex *lp, char qc) {
     }
     ir_lex_step(lp);
     ir_lex_consume(lp, '\0');
-    return c;
-}
-
-// \s*
-char ir_lex_spaces(IrLex *lp) {
-    char c = lp->current;
-
-    if (!isspace(c)) 
-        return c;
-    while (isspace(c)) {
-        c = ir_lex_step(lp);
-    }
     return c;
 }
 

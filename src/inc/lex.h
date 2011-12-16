@@ -22,6 +22,7 @@ enum {
     TK_WHILE,
     TK_BREAK,
     TK_CONTINUE,
+    TK_FUNCTION,
     TK_NEWLINE,
 };
 
