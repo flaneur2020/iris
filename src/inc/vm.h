@@ -3,8 +3,10 @@
 
 #include "object.h"
 #include "gc.h"
+#include "proto.h"
 
 typedef struct IrVM {
+    //
     unsigned int        throttle;
     IrHeap              heaps[HEAPS_MAX];
     unsigned int        heaps_count;

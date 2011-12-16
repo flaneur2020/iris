@@ -77,7 +77,7 @@ int ir_lex_init(IrLex *lp, char *path) {
     return 0;
 }
 
-int ir_lex_close(IrLex *lp) {
+int ir_lex_destroy(IrLex *lp) {
     fclose(lp->file);
     return 0;
 }

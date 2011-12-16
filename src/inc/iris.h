@@ -11,6 +11,7 @@
 
 #include "vm.h"
 #include "lex.h"
+#include "parser.h"
 #include "object.h"
 
 #define ir_log printf
