@@ -19,17 +19,22 @@ char *tkstr[] = {
     [TK_NUMBER] = "<number>",
     [TK_STRING] = "<string>",
     [TK_NAME]  = "<name>",
-    [TK_AND] = "AND",
-    [TK_OR] = "OR",
-    [TK_IF] = "IF", 
-    [TK_NIL] = "NIL",
-    [TK_FOR] = "FOR",
-    [TK_WHILE] = "WHILE",
-    [TK_BREAK] = "BREAK",
-    [TK_CONTINUE] = "CONTINUE",
-    [TK_NEWLINE] = "NEWLINE",
-    [TK_LOCAL] = "LOCAL"
+    [TK_AND] = "and",
+    [TK_OR] = "or",
+    [TK_IF] = "if", 
+    [TK_NIL] = "nil",
+    [TK_FOR] = "for",
+    [TK_WHILE] = "while",
+    [TK_BREAK] = "break",
+    [TK_CONTINUE] = "continue",
+    [TK_NEWLINE] = "newline",
+    [TK_LOCAL] = "local"
 };
+
+static int tkkeywords[] = { TK_AND, TK_OR, TK_IF, TK_LOCAL, TK_NIL, TK_FOR, TK_WHILE, TK_BREAK, TK_CONTINUE };
+
+// a reverse associated map of kwstr[];
+static st_table *kwtab = NULL;
 
 #define ir_lex_error(lp, fmt, ...) \
     do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->path, (lp)->line, (lp)->col, ##__VA_ARGS__); exit(1); } while (0)
@@ -38,6 +43,9 @@ char *tkstr[] = {
 
 int ir_lex_init(IrLex *lp, char *path) {
     FILE *fp;
+    int nkw;
+    int i;
+    st_data_t tk;
 
     // open file
     fp = fopen(path, "r");
@@ -53,6 +61,15 @@ int ir_lex_init(IrLex *lp, char *path) {
     lp->current = '\0';
     // read the first char
     ir_lex_step(lp);
+    // init the kwtab with keywords
+    if (kwtab)
+        return 0;
+    kwtab = st_init_strtable();
+    nkw = sizeof(tkkeywords) / sizeof(int);
+    for (i=0; i<nkw; i++) {
+        tk = tkkeywords[i];
+        st_insert(kwtab, (st_data_t)tkstr[tk], (st_data_t)tk);
+    }
     return 0;
 }
 

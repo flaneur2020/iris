@@ -27,7 +27,7 @@ enum {
 
 extern char* tkstr[];
 
-#define TKSTR(tk) (tkstr[(tk)])
+#define TKSTR(tk) (tkstrs[(tk)])
 
 typedef struct IrLex {
     char current;
