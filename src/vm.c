@@ -11,7 +11,7 @@ IrVM* ir_vm_new() {
     return vm;
 }
 
-int ir_vm_free(IrVM *vm){
+int ir_vm_destroy(IrVM *vm){
     free(vm);
     return 0;
 }

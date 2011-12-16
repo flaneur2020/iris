@@ -68,12 +68,14 @@ IrObject* ir_gc_newobj(IrVM *vm, int type){
     memset(slot, 0, sizeof(IrSlot));
     obj = (IrObject*)slot;
     obj->type = type;
+    ir_log("ir_gc_newobj: %lx\n", (VALUE)obj);
     return obj;
 }
 
-int ir_gc_free(IrVM *vm, IrObject *obj){
+int ir_gc_freeobj(IrVM *vm, IrObject *obj){
     IrSlot *slot;
     
+    ir_log("ir_gc_freeobj: %lx type: %x\n", (VALUE)obj, obj->type);
     slot = (IrSlot*)obj;
     slot->ohead.type = T_NONE;
     slot->next = vm->freeslots.next;
@@ -100,11 +102,15 @@ int is_pointer_to_heap(IrVM *vm, VALUE p){
     return 0;
 }
 
+/* ------------------------------------------------- */
+
 // mark an object recursively.
 int ir_gc_mark(IrObject *obj) {
+    if (obj->type == T_NONE)
+        return 0;
     if (obj->flag & FL_MARK)  
         return 0;
-    ir_log("ir_gc_mark: obj: %lx\n", (VALUE)obj);
+    ir_log("ir_gc_mark: obj: %lx type: %x\n", (VALUE)obj, obj->type);
     obj->flag |= FL_MARK;
     return 0;
 }
@@ -132,10 +138,36 @@ int ir_gc_mark_stack(IrVM *vm){
     return 0;
 }
 
-int ir_gc_collect(IrVM *vm){
+int ir_gc_sweep(IrVM *vm){
+    int i;
+    int j;
+    int nslots;
+    IrHeap *heap;
+    IrSlot *slot;
+    IrObject *obj;
+    IrSlotBody *slot_bodies;
+
+    // tranverse heaps
+    for (i=0; i<vm->heaps_count; i++) {
+        heap = &vm->heaps[i];
+        slot_bodies = (IrSlotBody*)heap->start;
+        nslots = heap->size / sizeof(IrSlotBody);
+        for (j=0; j<nslots; j++) {
+            slot = (IrSlot*)&slot_bodies[j];
+            if (slot->ohead.type == T_NONE)
+                continue;
+            obj = (IrObject*)slot;
+            if (obj->flag & FL_MARK)
+                obj->flag &= ~FL_MARK;
+            else
+                ir_gc_freeobj(vm, obj);
+        }
+    }
     return 0;
 }
 
-int ir_gc_sweep(IrVM *vm){
+int ir_gc_collect(IrVM *vm) {
+    ir_gc_mark_stack(vm);
+    ir_gc_sweep(vm);
     return 0;
 }
