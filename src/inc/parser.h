@@ -4,4 +4,7 @@
 #include "lex.h"
 #include "proto.h"
 
+typedef struct IrParser {
+} IrParser;
+
 #endif

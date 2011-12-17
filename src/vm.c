@@ -2,16 +2,11 @@
 
 /* ------------------------------------------------- */
 
-IrVM* ir_vm_new() {
-    IrVM *vm;
-    
-    vm = malloc(sizeof(IrVM));
-    memset(vm, 0, sizeof(IrVM));
+int ir_vm_init(IrVM *vm) {
     vm->freeslots.next = NULL;
-    return vm;
+    return 0;
 }
 
-int ir_vm_destroy(IrVM *vm){
-    free(vm);
+int ir_vm_close(IrVM *vm){
     return 0;
 }

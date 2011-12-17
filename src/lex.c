@@ -1,5 +1,17 @@
 #include "inc/iris.h"
 
+static int ir_lex_step(IrLex *lp);
+static int ir_lex_step_until(IrLex *lp, char *str);
+static int ir_lex_consume(IrLex *lp, char c);
+static int ir_lex_getc(IrLex *lp);
+static int ir_lex_reset_buf(IrLex *lp, int size);
+
+static char ir_lex_name(IrLex *lp);
+static char ir_lex_number(IrLex *lp);
+static char ir_lex_string(IrLex *lp, char qc);
+static char ir_lex_spaces(IrLex *lp);
+static char ir_lex_digits(IrLex *lp);
+
 char *tkstr[] = {
     ['.'] = ".",
     ['+'] = "+",
@@ -45,19 +57,13 @@ static st_table *kwtab = NULL;
 
 /* ------------------------------------------ */
 
-int ir_lex_init(IrLex *lp, char *path) {
-    FILE *fp;
+int ir_lex_init(IrLex *lp, FILE *fp, char *path) {
     int nkw;
     int i;
     st_data_t tk;
 
-    // open file
-    fp = fopen(path, "r");
-    if (fp == NULL) {
-        fprintf(stderr, "File Not Found: %s\n", path);
-        exit(1);
-    }
     // misc init 
+    lp->file = fp;
     lp->path = path;
     lp->file = fp;
     lp->line = 0;
@@ -74,11 +80,6 @@ int ir_lex_init(IrLex *lp, char *path) {
         tk = tkkeywords[i];
         st_insert(kwtab, (st_data_t)tkstr[tk], (st_data_t)tk);
     }
-    return 0;
-}
-
-int ir_lex_destroy(IrLex *lp) {
-    fclose(lp->file);
     return 0;
 }
 

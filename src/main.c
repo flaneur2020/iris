@@ -2,18 +2,11 @@
 
 
 int ir_main(int argc, char **argv) {
-    IrLex lex;
-    int tk;
     char *path = "test/sample.lua";
+    IrVM vm;
 
-    ir_lex_init(&lex, path);
-    while ((tk = ir_lex_next(&lex)) > 0) {
-        if (TKSTR(tk)[0] == '<') 
-            printf("%s %s\n", TKSTR(tk), lex.buf);
-        else 
-            printf("%s \n", TKSTR(tk));
-    }
-    
+    ir_vm_init(&vm);
+    ir_parse(&vm, path);
     return 0;
 }
 
