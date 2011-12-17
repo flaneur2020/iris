@@ -6,6 +6,7 @@
 #include "proto.h"
 
 typedef struct IrVM {
+    struct iv_vector   *protos;
     //
     unsigned int        throttle;
     IrHeap              heaps[HEAPS_MAX];

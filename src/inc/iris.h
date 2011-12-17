@@ -8,11 +8,13 @@
 #include <ctype.h>
 #include <setjmp.h>
 #include "st.h"
+#include "vector.h"
 
 #include "vm.h"
 #include "lex.h"
 #include "parser.h"
 #include "object.h"
+
 
 #define ir_log printf
 
