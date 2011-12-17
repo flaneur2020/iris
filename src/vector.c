@@ -1,16 +1,16 @@
 #include <assert.h>
 #include "inc/vector.h"
 
-struct ir_vector* iv_new(size_t entry_size, size_t max_count) {
+struct ir_vector* iv_new(size_t entry_size, size_t default_max_count) {
     struct ir_vector *iv;
 
     assert(entry_size > 0);
     iv = (struct ir_vector*)malloc(sizeof(struct ir_vector));
     iv->count = 0;
     iv->entry_size = entry_size;
-    iv->max_count = (max_count > VECTOR_DEFAULT_MAX_COUNT)? max_count: VECTOR_DEFAULT_MAX_COUNT;
+    iv->max_count = (default_max_count > VECTOR_DEFAULT_MAX_COUNT)? default_max_count: VECTOR_DEFAULT_MAX_COUNT;
     iv->entries = malloc(iv->max_count * iv->entry_size);
-    while(iv->max_count <= max_count)
+    while(iv->max_count <= default_max_count)
         iv_grow(iv);
     return iv;
 }

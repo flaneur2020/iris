@@ -14,7 +14,7 @@ struct ir_vector {
     void  *entries;
 };
 
-struct ir_vector* iv_new(size_t entry_size, size_t max_count);
+struct ir_vector* iv_new(size_t entry_size, size_t default_max_count);
 int iv_grow(struct ir_vector *iv);
 int iv_free(struct ir_vector *iv);
 
