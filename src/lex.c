@@ -50,7 +50,7 @@ static int tkkeywords[] = {
 };
 
 // a reverse associated map of kwstr[];
-static st_table *kwtab = NULL;
+static struct st_table *kwtab = NULL;
 
 #define ir_lex_error(lp, fmt, ...) \
     do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->path, (lp)->line, (lp)->col, ##__VA_ARGS__); exit(1); } while (0)
