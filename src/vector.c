@@ -36,11 +36,11 @@ int iv_insert(struct ir_vector *iv, unsigned int i, void* valp) {
     void *p;
 
     assert(valp != NULL);
-    while (iv->max_count < i+1)
+    while (iv->max_count <= i)
         iv_grow(iv);
-    if (i > iv->count)
+    if (iv->count <= i)
         iv->count = i+1;
-    p = (void*)((unsigned long)iv->entries + (unsigned long)i * iv->entry_size);
+    p = IV_FIND(iv, i);
     memcpy(p, valp, iv->entry_size);
     return 0;
 }
