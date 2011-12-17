@@ -9,9 +9,9 @@ struct ir_vector* iv_new(size_t entry_size, size_t default_max_count) {
     iv->count = 0;
     iv->entry_size = entry_size;
     iv->max_count = (default_max_count > VECTOR_DEFAULT_MAX_COUNT)? default_max_count: VECTOR_DEFAULT_MAX_COUNT;
-    iv->entries = malloc(iv->max_count * iv->entry_size);
     while(iv->max_count <= default_max_count)
-        iv_grow(iv);
+        iv->max_count *= VECTOR_GROWTH_FACTOR;
+    iv->entries = malloc(iv->max_count * iv->entry_size);
     return iv;
 }
 
