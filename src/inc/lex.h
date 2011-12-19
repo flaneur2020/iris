@@ -30,10 +30,16 @@ extern char* tkstr[];
 
 #define TKSTR(tk) (tkstr[(tk)])
 
+typedef struct IrToken {
+    int token;
+    char *buf;
+    int buf_size;
+} IrToken;
+
 typedef struct IrLex {
-    char current;
-    char buf[NTOKEN_SIZE];
-    int  buf_size;
+    IrToken current;
+    IrToken lookahead;
+    char ch;
     int  line;
     int  col;
     FILE *file;

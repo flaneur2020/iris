@@ -5,6 +5,9 @@
 #include "proto.h"
 
 typedef struct IrParser {
+    IrLex lex;
+    char *path;
+    FILE *file;
 } IrParser;
 
 #endif

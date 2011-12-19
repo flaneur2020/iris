@@ -26,6 +26,7 @@ char *tkstr[] = {
     ['}'] = "}",
     ['('] = "(",
     [')'] = ")",
+    [';'] = ";",
     [TK_NEWLINE] = "NEWLINE",
     [TK_GTE] = "GTE",
     [TK_LTE] = "LTE",
@@ -63,12 +64,14 @@ int ir_lex_init(IrLex *lp, FILE *fp, char *path) {
     st_data_t tk;
 
     // misc init 
+    lp->current.buf = malloc(NTOKEN_SIZE);
+    lp->lookahead.buf = malloc(NTOKEN_SIZE);
     lp->file = fp;
     lp->path = path;
     lp->file = fp;
     lp->line = 0;
     lp->col  = 0;
-    lp->current = '\0';
+    lp->ch = '\0';
     // read the first char
     ir_lex_step(lp);
     // init the kwtab with keywords
@@ -85,15 +88,19 @@ int ir_lex_init(IrLex *lp, FILE *fp, char *path) {
 
 /* --------------------------------------------- */
 
+int ir_lex_next(IrLex *lp){
+    return 0;
+}
+
 // Fetch one token each time, returns the type of token,
-// and store the content of this token into lp->buf[].
+// and store the content of this token into lp->lookahead.buf[].
 // On fetching finished, returns 0.
-int ir_lex_next(IrLex *lp) {
+int ir_lex(IrLex *lp) {
     char c;
     int r;
     int tk;
 
-    while((c = lp->current) != EOF && c != '\0') {
+    while((c = lp->ch) != EOF && c != '\0') {
         ir_lex_reset_buf(lp, 0);
         if (c == '<') {
             c = ir_lex_step(lp);
@@ -151,7 +158,7 @@ int ir_lex_next(IrLex *lp) {
         // keyword
         if (isalpha(c)) {
             ir_lex_name(lp);
-            r = st_lookup(kwtab, (st_data_t)lp->buf, (st_data_t*)&tk);
+            r = st_lookup(kwtab, (st_data_t)lp->lookahead.buf, (st_data_t*)&tk);
             if (r) {
                 return tk;
             }
@@ -173,39 +180,39 @@ int ir_lex_step(IrLex *lp){
     else {
         lp->col++;
     }
-    return (lp->current = c);
+    return (lp->ch = c);
 }
 
-int ir_lex_step_until(IrLex *lp, char *str){
+static int ir_lex_step_until(IrLex *lp, char *str){
     while (!strchr(str, ir_lex_step(lp)));
     return 0;
 }
 
-int ir_lex_consume(IrLex *lp, char c) {
-    lp->buf[lp->buf_size++] = c;
+static int ir_lex_consume(IrLex *lp, char c) {
+    lp->lookahead.buf[lp->lookahead.buf_size++] = c;
     return 0;
 }
 
-int ir_lex_reset_buf(IrLex *lp, int size){
-    lp->buf_size = 0;
+static int ir_lex_reset_buf(IrLex *lp, int size){
+    lp->lookahead.buf_size = 0;
     return 0;
 }
 
 /* -------------------------------------------- */
 
-int ir_lex_getc(IrLex *lp) {
+static int ir_lex_getc(IrLex *lp) {
     return fgetc(lp->file);
 }
 
 /* -------------------------------------------- */
 
 // digits { . digits }?
-char ir_lex_number(IrLex *lp){
-    char c = lp->current;
+static char ir_lex_number(IrLex *lp){
+    char c = lp->ch;
 
     ir_lex_digits(lp);
     // if it's an decimal
-    if ((c = lp->current) == '.') {
+    if ((c = lp->ch) == '.') {
         ir_lex_consume(lp, c);
         ir_lex_digits(lp);
     }
@@ -214,8 +221,8 @@ char ir_lex_number(IrLex *lp){
 }
 
 // \d+
-char ir_lex_digits(IrLex *lp) {
-    char c = lp->current;
+static char ir_lex_digits(IrLex *lp) {
+    char c = lp->ch;
     
     if (!isdigit(c)) 
         ir_lex_error(lp, "number expected, but got: %c", c);
@@ -225,14 +232,14 @@ char ir_lex_digits(IrLex *lp) {
     }
     ir_lex_consume(lp, '\0');
     if (isalpha(c)) {
-        ir_lex_error(lp, "malformed number near %s, expected number, but got: %c", lp->buf, c);
+        ir_lex_error(lp, "malformed number near %s, expected number, but got: %c", lp->lookahead.buf, c);
     }
     return c;
 }
 
 // \w[\d\w]*
-char ir_lex_name(IrLex *lp){
-    char c = lp->current;
+static char ir_lex_name(IrLex *lp){
+    char c = lp->ch;
 
     if (!isalpha(c))  
         return c;
@@ -245,8 +252,8 @@ char ir_lex_name(IrLex *lp){
 }
 
 // \s*
-char ir_lex_spaces(IrLex *lp) {
-    char c = lp->current;
+static char ir_lex_spaces(IrLex *lp) {
+    char c = lp->ch;
 
     if (!isspace(c)) 
         return c;
@@ -257,8 +264,8 @@ char ir_lex_spaces(IrLex *lp) {
 }
 
 // ' '
-char ir_lex_string(IrLex *lp, char qc) {
-    char c = lp->current;
+static char ir_lex_string(IrLex *lp, char qc) {
+    char c = lp->ch;
 
     while ((c = ir_lex_step(lp)) != qc) {
         switch(c) {

@@ -18,9 +18,11 @@ struct ir_vector* iv_new(size_t entry_size, size_t default_max_count);
 int iv_grow(struct ir_vector *iv);
 int iv_free(struct ir_vector *iv);
 
+int iv_reset(struct ir_vector *iv);
 int iv_insert(struct ir_vector *iv, unsigned int i, void *val);
 void* iv_find(struct ir_vector *iv, unsigned int i);
-void* iv_append(struct ir_vector *iv);
+void* iv_append(struct ir_vector *iv, void *val);
+char* iv_append_char(struct ir_vector *iv, char c);
 
 #define IV_FIND(iv, i) \
     (void*)((unsigned long)(iv)->entries + (i) * (iv)->entry_size);

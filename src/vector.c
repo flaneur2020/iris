@@ -32,6 +32,11 @@ int iv_free(struct ir_vector *iv) {
 
 /* ---------------------------------------------- */
 
+int iv_reset(struct ir_vector *iv){
+    iv->count = 0;
+    return 0;
+}
+
 int iv_insert(struct ir_vector *iv, unsigned int i, void* valp) {
     void *p;
 
@@ -51,14 +56,25 @@ void* iv_find(struct ir_vector *iv, unsigned int i) {
     return IV_FIND(iv, i);
 }
 
-void* iv_append(struct ir_vector *iv) {
+void* iv_append(struct ir_vector *iv, void *valp) {
     int i;
+    void *p;
 
     iv->count++;
     if (iv->count >= iv->max_count) {
         iv_grow(iv);
     }
     i = iv->count-1;
-    return IV_FIND(iv, i);
+    p = IV_FIND(iv, i);
+    if (valp != NULL) {
+        memcpy(p, valp, iv->entry_size);
+    }
+    return p;
 }
 
+/*------------------------------------------------- */
+
+char* iv_append_char(struct ir_vector *iv, char c){
+    assert(iv->entry_size == sizeof(char));
+    return iv_append(iv, &c);
+}
