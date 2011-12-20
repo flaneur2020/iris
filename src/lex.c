@@ -5,6 +5,7 @@ static int ir_lex_step_until(IrLex *lp, char *str);
 static int ir_lex_consume(IrLex *lp, char c);
 static int ir_lex_getc(IrLex *lp);
 static int ir_lex_reset_buf(IrLex *lp, int size);
+static int ir_lex(IrLex *lp);
 
 static char ir_lex_name(IrLex *lp);
 static char ir_lex_number(IrLex *lp);
@@ -58,20 +59,27 @@ static struct st_table *kwtab = NULL;
 
 /* ------------------------------------------ */
 
+int ir_token_init(IrToken *tp){
+    tp->token = 0;
+    tp->buf = malloc(NTOKEN_SIZE);
+    memset(tp->buf, 0, NTOKEN_SIZE);
+    return 0;
+}
+
 int ir_lex_init(IrLex *lp, FILE *fp, char *path) {
     int nkw;
     int i;
     st_data_t tk;
 
     // misc init 
-    lp->current.buf = malloc(NTOKEN_SIZE);
-    lp->lookahead.buf = malloc(NTOKEN_SIZE);
     lp->file = fp;
     lp->path = path;
     lp->file = fp;
     lp->line = 0;
     lp->col  = 0;
     lp->ch = '\0';
+    ir_token_init(&lp->current);
+    ir_token_init(&lp->lookahead);
     // read the first char
     ir_lex_step(lp);
     // init the kwtab with keywords
@@ -83,19 +91,24 @@ int ir_lex_init(IrLex *lp, FILE *fp, char *path) {
         tk = tkkeywords[i];
         st_insert(kwtab, (st_data_t)tkstr[tk], (st_data_t)tk);
     }
+    // 
+    ir_lex_next(lp);
     return 0;
 }
 
 /* --------------------------------------------- */
 
 int ir_lex_next(IrLex *lp){
-    return 0;
+    lp->current.token = lp->lookahead.token;
+    strcpy(lp->current.buf, lp->lookahead.buf);
+    lp->lookahead.token = ir_lex(lp);
+    return lp->current.token;
 }
 
 // Fetch one token each time, returns the type of token,
 // and store the content of this token into lp->lookahead.buf[].
 // On fetching finished, returns 0.
-int ir_lex(IrLex *lp) {
+static int ir_lex(IrLex *lp) {
     char c;
     int r;
     int tk;

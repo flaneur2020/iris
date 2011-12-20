@@ -4,6 +4,7 @@
 #define NTOKEN_SIZE 4096
 
 enum {
+    TK_EOI = 0,
     // terminal symbols
     TK_NUMBER = 257,
     TK_STRING,

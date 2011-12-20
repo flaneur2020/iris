@@ -2,17 +2,28 @@
 
 
 int ir_main(int argc, char **argv) {
+    return 0;
+}
+
+int ir_test_lex(){
     char *path = "test/sample.lua";
     IrVM vm;
+    IrLex lex;
+    FILE *fp;
+    int tk;
 
+    fp = fopen(path, "r");
     ir_vm_init(&vm);
-    ir_parse(&vm, path);
+    ir_lex_init(&lex, fp, path);
+    while((tk = ir_lex_next(&lex)) != 0){
+        printf("%s\n", tkstr[tk]);
+    }
     return 0;
 }
 
 int main(int argc, char **argv) {
     ir_stack_start = get_stack_pointer();
     ir_log("ir_stack_start: %lx\n", ir_stack_start);
-    ir_main(argc, argv);
+    ir_test_lex();
     return 0;
 }
