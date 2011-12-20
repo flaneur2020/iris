@@ -40,7 +40,7 @@ int is_pointer_to_heap(IrVM *vm, VALUE p);
 
 int ir_parse(IrVM *vm, char *path);
 
-int ir_lex_init(IrLex *lp, FILE *fp, char *path);
+int ir_lex_init(IrLex *lp, char *path);
 int ir_lex_next(IrLex *lp);
 int ir_lex_close(IrLex *lp);
 int ir_lex_error(IrLex *lp);

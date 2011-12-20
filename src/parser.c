@@ -7,7 +7,7 @@ static int ir_parse_chunk(IrParser *pp);
 static int ir_parse_stat(IrParser *pp);
 static int ir_parse_laststat(IrParser *pp);
 
-int ir_parser_init(IrParser *pp){
+int ir_parser_init(IrParser *pp, char *path){
     return 0;
 }
 
@@ -27,7 +27,7 @@ int ir_parse(IrVM *vm, char *path){
         exit(1);
     }
     // init lexer
-    ir_lex_init(&lex, fp, path);
+    ir_lex_init(&lex, path);
     ir_parse_chunk(&parser);
     //  
     fclose(fp);

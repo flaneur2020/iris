@@ -66,11 +66,15 @@ int ir_token_init(IrToken *tp){
     return 0;
 }
 
-int ir_lex_init(IrLex *lp, FILE *fp, char *path) {
+int ir_lex_init(IrLex *lp, char *path) {
     int nkw;
     int i;
     st_data_t tk;
+    FILE *fp;
 
+    fp = fopen(path, "r");
+    if (fp == NULL)
+        return -1;
     // misc init 
     lp->file = fp;
     lp->path = path;
@@ -93,6 +97,13 @@ int ir_lex_init(IrLex *lp, FILE *fp, char *path) {
     }
     // 
     ir_lex_next(lp);
+    return 0;
+}
+
+int ir_lex_close(IrLex *lex){
+    fclose(lex->file);
+    free(lex->current.buf);
+    free(lex->lookahead.buf);
     return 0;
 }
 

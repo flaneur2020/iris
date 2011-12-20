@@ -9,12 +9,10 @@ int ir_test_lex(){
     char *path = "test/sample.lua";
     IrVM vm;
     IrLex lex;
-    FILE *fp;
     int tk;
 
-    fp = fopen(path, "r");
     ir_vm_init(&vm);
-    ir_lex_init(&lex, fp, path);
+    ir_lex_init(&lex, path);
     while((tk = ir_lex_next(&lex)) != 0){
         printf("%s\n", tkstr[tk]);
     }
