@@ -42,6 +42,7 @@ int ir_parse(IrVM *vm, char *path);
 
 int ir_lex_init(IrLex *lp, char *path);
 int ir_lex_next(IrLex *lp);
+int ir_lex_lookahead(IrLex *lp);
 int ir_lex_close(IrLex *lp);
 int ir_lex_error(IrLex *lp);
 

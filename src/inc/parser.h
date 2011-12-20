@@ -5,6 +5,7 @@
 #include "proto.h"
 
 typedef struct IrParser {
+    IrVM *vm;
     IrLex lex;
 } IrParser;
 

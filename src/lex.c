@@ -116,6 +116,12 @@ int ir_lex_next(IrLex *lp){
     return lp->current.token;
 }
 
+int ir_lex_lookahead(IrLex *lp){
+    return lp->lookahead.token;
+}
+
+/* -------------------------------------------- */
+
 // Fetch one token each time, returns the type of token,
 // and store the content of this token into lp->lookahead.buf[].
 // On fetching finished, returns 0.

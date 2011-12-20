@@ -7,30 +7,22 @@ static int ir_parse_chunk(IrParser *pp);
 static int ir_parse_stat(IrParser *pp);
 static int ir_parse_laststat(IrParser *pp);
 
-int ir_parser_init(IrParser *pp, char *path){
+int ir_parser_init(IrParser *pp, IrVM *vm, char *path){
+    ir_lex_init(&pp->lex, path);
+    pp->vm = vm;
     return 0;
 }
 
-int ir_parser_close(){
+int ir_parser_close(IrParser *pp){
+    ir_lex_close(&pp->lex);
     return 0;
 }
 
 int ir_parse(IrVM *vm, char *path){
-    IrLex lex; 
     IrParser parser;
-    FILE *fp;
 
-    // open file
-    fp = fopen(path, "r");
-    if (fp == NULL) {
-        fprintf(stderr, "File Not Found: %s\n", path);
-        exit(1);
-    }
-    // init lexer
-    ir_lex_init(&lex, path);
+    ir_parser_init(&parser, vm, path);
     ir_parse_chunk(&parser);
-    //  
-    fclose(fp);
     return 0;
 }
 
@@ -42,12 +34,13 @@ int ir_parse(IrVM *vm, char *path){
 static int ir_parse_chunk(IrParser *pp){
     int tk;
 
-    while(ir_parse_stat(pp) == 0) {
+    while(ir_parse_stat(pp) != 0) {
         tk = ir_lex_next(&pp->lex);
-        if (tk != TK_NEWLINE) 
+        if (tk != TK_NEWLINE || tk != ';') 
             ir_parse_error(pp, "expected ; or \\n");
     }
-    if (ir_parse_laststat(pp) == 0) {
+    if (ir_parse_laststat(pp) != 0) {
+        tk = ir_lex_next(&pp->lex);
         if (tk != TK_NEWLINE || tk != ';') 
             ir_parse_error(pp, "expected ; or \\n");
     }
@@ -55,6 +48,9 @@ static int ir_parse_chunk(IrParser *pp){
 }
 
 static int ir_parse_stat(IrParser *pp){
+    int tk;
+
+    tk = ir_lex_next(&pp->lex);
     return 0;
 }
 
