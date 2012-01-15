@@ -1,4 +1,4 @@
-#include "inc/iris.h"
+#include "iris.h"
 
 int ir_heap_init(IrVM *vm);
 int ir_heap_grow(IrVM *vm);

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "inc/st.h"
+#include "st.h"
 
 typedef struct st_table_entry st_table_entry;
 

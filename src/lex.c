@@ -1,4 +1,4 @@
-#include "inc/iris.h"
+#include "iris.h"
 
 static int ir_lex_step(IrLex *lp);
 static int ir_lex_step_until(IrLex *lp, char *str);

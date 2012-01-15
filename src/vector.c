@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "inc/vector.h"
+#include "vector.h"
 
 struct ir_vector* iv_new(size_t entry_size, size_t default_max_count) {
     struct ir_vector *iv;

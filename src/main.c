@@ -1,4 +1,4 @@
-#include "inc/iris.h"
+#include "iris.h"
 
 
 int ir_main(int argc, char **argv) {

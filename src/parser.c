@@ -1,4 +1,4 @@
-#include "inc/iris.h"
+#include "iris.h"
 
 #define ir_parse_error(pp, fmt, ...) \
     do { fprintf(stderr, "Parse Error: %s:%d:%d: " fmt "\n", (pp)->lex.path, (pp)->lex.line, (pp)->lex.col, ##__VA_ARGS__); exit(1); } while (0)
