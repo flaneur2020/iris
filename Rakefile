@@ -8,18 +8,18 @@ task :build => [:link, :ctags]
 
 mkdir_p 'bin'
 
-cfiles = Dir['src/*.c']
+cfiles = Dir['src/*.cpp']
 ofiles = cfiles.map{|fn_c| 'bin/' + File.basename(fn_c).ext('o') }
 
 cfiles.each do |fn_c|
   fn_o = 'bin/' + File.basename(fn_c).ext('o')
   file fn_o => fn_c do
-    sh "gcc -c -Wall -Werror #{fn_c} -o #{fn_o}"
+    sh "g++ -c -Wall #{fn_c} -o #{fn_o}"
   end
 end
 
 task :link => ofiles do
-  sh "gcc #{ofiles * ' '} -o bin/main"
+  sh "g++ #{ofiles * ' '} -o bin/main"
 end
 
 task :clean do
