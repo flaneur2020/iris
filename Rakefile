@@ -9,11 +9,12 @@ task :build => [:link, :ctags]
 mkdir_p 'bin'
 
 cfiles = Dir['src/*.cpp']
+hfiles = Dir['src/*.h']
 ofiles = cfiles.map{|fn_c| 'bin/' + File.basename(fn_c).ext('o') }
 
 cfiles.each do |fn_c|
   fn_o = 'bin/' + File.basename(fn_c).ext('o')
-  file fn_o => fn_c do
+  file fn_o => [fn_c, *hfiles] do
     sh "g++ -c -Wall #{fn_c} -o #{fn_o}"
   end
 end
