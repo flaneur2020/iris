@@ -31,7 +31,7 @@ Lexer::Lexer(FILE *file, const char *file_name)
     }
     // read the first char
     step();
-    // first step
+    // read the first token
     next();
 }
 
@@ -204,7 +204,6 @@ char Lexer::tstring(char qc) {
         }
     }
     step();
-    consume('\0');
     return c;
 }
 
@@ -217,7 +216,6 @@ char Lexer::tname(){
         consume(c);
         c = step();
     }
-    consume('\0');
     return c;
 }
 
@@ -230,7 +228,6 @@ char Lexer::tnumber(){
         consume(c);
         c = tdigits();
     }
-    consume('\0');
     return c;
 }
 
@@ -243,7 +240,6 @@ char Lexer::tdigits() {
         consume(c);
         c = step();
     }
-    consume('\0');
     if (isalpha(c)) {
         lex_error(this, "malformed number near %s, expected number, but got: %c", this->ahead.buf, c);
     }
