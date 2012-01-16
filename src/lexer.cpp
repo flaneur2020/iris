@@ -29,6 +29,10 @@ Lexer::Lexer(FILE *file, const char *file_name)
             kwtab->insert(make_pair(str, tk));
         }
     }
+    // read the first char
+    step();
+    // first step
+    next();
 }
 
 Lexer::~Lexer() {
