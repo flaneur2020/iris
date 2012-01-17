@@ -6,8 +6,6 @@
 using namespace std;
 
 namespace iris {
-    struct Token;
-};
 
 struct Token {
     int token;
@@ -54,5 +52,7 @@ static int tkkeywords[] = {
 const int NTKKEYWORDS = sizeof(tkkeywords) / sizeof(int);
 
 const char* tk2str(int t);
+
+}
 
 #endif

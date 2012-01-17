@@ -1,6 +1,8 @@
 #include "token.h"
 
-const char* tk2str(int t){
+using namespace iris;
+
+const char* iris::tk2str(int t){
     switch (t){
     case '.': return ".";
     case '+': return "+";

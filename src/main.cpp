@@ -3,6 +3,7 @@
 #include "lexer.h"
 
 using namespace std;
+using namespace iris;
 
 int main(int argc, char* argv[]){
     const char *path = "test/sample.lua";

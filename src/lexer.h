@@ -10,8 +10,6 @@
 using namespace std;
 
 namespace iris {
-    class Lexer;
-}
 
 class Lexer {
     FILE *file;
@@ -43,6 +41,8 @@ private:
     char tspaces();
     char tdigits();
 };
+
+}
 
 
 #define lex_error(lp, fmt, ...) \
