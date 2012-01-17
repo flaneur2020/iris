@@ -33,7 +33,7 @@ void Parser::parse_error(char *fmt, ...){
 
 int Parser::token(int tk){
     if (_lexer.current()->token != tk) 
-        parse_error("%s expected, but got: %s", tk2str(tk), _lexer.current()->token);
+        parse_error("%s expected, but got: %s", tk2str(tk), tk2str(_lexer.current()->token));
     _lexer.next();
     return P_MATCH;
 }
@@ -43,8 +43,9 @@ int Parser::chunk(){
     do {
         if (stat() == P_NOT_MATCH) 
             break;
-        if (test_lookahead(';'))
+        if (test_lookahead(';')) {
             _lexer.next();
+        }
     } while(1);
     return P_MATCH;
 }
