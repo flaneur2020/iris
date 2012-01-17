@@ -50,7 +50,12 @@ Lexer::~Lexer() {
 int Lexer::next() {
     _current.token = _ahead.token;
     _current.buf   = _ahead.buf;
-    _ahead.token = lex();
+    try {
+        _ahead.token = lex();
+    }
+    catch (lex_exception& e) {
+        _ahead.token = TK_EOI;
+    }
     return _current.token;
 }
 
@@ -62,7 +67,7 @@ const Token* Lexer::lookahead() const {
     return &_ahead;
 }
 
-void Lexer::lex_error(char *fmt, ...){
+void Lexer::lex_error(const char *fmt, ...){
     va_list vp;
     va_start(vp, fmt); 
     fprintf(stderr, "Lex error: %s:%d:%d ", _file_name, _line, _col);
@@ -255,14 +260,15 @@ char Lexer::tnumber(){
 char Lexer::tdigits() {
     char c = _ch;
     
-    if (!isdigit(c)) 
+    if (!isdigit(c)) {
         lex_error("number expected, but got: %c", c);
+    }
     while (isdigit(c)) {
         consume(c);
         c = step();
     }
     if (isalpha(c)) {
-        lex_error("malformed number near %s, expected number, but got: %c", _ahead.buf, c);
+        lex_error("malformed number near %s, expected number, but got: %c", _ahead.buf.c_str(), c);
     }
     return c;
 }

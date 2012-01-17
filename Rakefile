@@ -1,7 +1,7 @@
 task :default => :run
 
 task :run => :build do
-  sh "bin/main"
+  sh "bin/main 2>&1"
 end
 
 task :build => [:link, :ctags]

@@ -27,7 +27,7 @@ public:
     int next();
     const Token* current() const;
     const Token* lookahead() const;
-    void lex_error(char *fmt, ...);
+    void lex_error(const char *fmt, ...);
 
 private:
     char next_char();
