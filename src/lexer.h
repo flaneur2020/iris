@@ -12,13 +12,13 @@ using namespace std;
 namespace iris {
 
 class Lexer {
-    FILE *file;
-    const char *file_name;
-    Token current;
-    Token ahead;
-    int line;
-    int col;
-    char ch;
+    FILE *_file;
+    const char *_file_name;
+    Token _current;
+    Token _ahead;
+    int _line;
+    int _col;
+    char _ch;
 
 public: 
     explicit Lexer(FILE *file, const char *file_name);
@@ -46,6 +46,6 @@ private:
 
 
 #define lex_error(lp, fmt, ...) \
-    do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->file_name, (lp)->line, (lp)->col, ##__VA_ARGS__); exit(1); } while (0)
+    do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->_file_name, (lp)->_line, (lp)->_col, ##__VA_ARGS__); exit(1); } while (0)
 
 #endif

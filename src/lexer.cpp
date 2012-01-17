@@ -13,13 +13,13 @@ using namespace iris;
 static map<string, int> *kwtab = NULL;
 
 Lexer::Lexer(FILE *file, const char *file_name)
-    : file(file)
-    , file_name(file_name)
-    , current()
-    , ahead()
-    , line(0)
-    , col(0)
-    , ch('\0')
+    : _file(file)
+    , _file_name(file_name)
+    , _current()
+    , _ahead()
+    , _line(0)
+    , _col(0)
+    , _ch('\0')
 {
     // initialize the kwtab
     if (kwtab == NULL) {
@@ -42,14 +42,14 @@ Lexer::~Lexer() {
 /* ----------------------------------------------------- */
 
 int Lexer::next() {
-    this->current.token = this->ahead.token;
-    this->current.buf   = this->ahead.buf;
-    this->ahead.token = lex();
-    return this->current.token;
+    _current.token = _ahead.token;
+    _current.buf   = _ahead.buf;
+    _ahead.token = lex();
+    return _current.token;
 }
 
 int Lexer::lookahead() {
-    return this->ahead.token;
+    return _ahead.token;
 }
 
 /* ----------------------------------------------------- */
@@ -59,13 +59,13 @@ char Lexer::step() {
 
     c = next_char();
     if (c == '\n') {
-        this->line++;
-        this->col = 0;
+        _line++;
+        _col = 0;
     }
     else {
-        this->col++;
+        _col++;
     }
-    return (this->ch = c);
+    return (_ch = c);
 }
 
 char Lexer::step_until(const char *str) {
@@ -74,16 +74,16 @@ char Lexer::step_until(const char *str) {
 }
 
 char Lexer::consume(char c){
-    this->ahead.buf.push_back(c);
+    _ahead.buf.push_back(c);
     return c;
 }
 
 void Lexer::reset_buf(){
-    this->ahead.buf.clear();
+    _ahead.buf.clear();
 }
 
 char Lexer::next_char() {
-    return fgetc(this->file);
+    return fgetc(_file);
 }
 
 int Lexer::lex() {
@@ -92,7 +92,7 @@ int Lexer::lex() {
     int tk;
     map<string, int>::iterator ri;
 
-    while((c = this->ch) != EOF && c != '\0') {
+    while((c = _ch) != EOF && c != '\0') {
         reset_buf();
         if (c == '<') {
             c = step();
@@ -150,7 +150,7 @@ int Lexer::lex() {
         // keyword
         if (isalpha(c)) {
             tname();
-            ri = kwtab->find(ahead.buf);
+            ri = kwtab->find(_ahead.buf);
             if (ri != kwtab->end()) {
                 return ri->second;
             }
@@ -164,7 +164,7 @@ int Lexer::lex() {
 /* --------------------------------------------------- */
 
 char Lexer::tspaces() {
-    char c = this->ch;
+    char c = _ch;
 
     if (!isspace(c)) 
         return c;
@@ -175,7 +175,7 @@ char Lexer::tspaces() {
 }
 
 char Lexer::tstring(char qc) {
-    char c = this->ch;
+    char c = _ch;
 
     while ((c = step()) != qc) {
         switch(c) {
@@ -209,7 +209,7 @@ char Lexer::tstring(char qc) {
 }
 
 char Lexer::tname(){
-    char c = this->ch;
+    char c = _ch;
 
     if (!isalpha(c))  
         return c;
@@ -221,7 +221,7 @@ char Lexer::tname(){
 }
 
 char Lexer::tnumber(){
-    char c = this->ch;
+    char c = _ch;
 
     c = tdigits();
     // if it's an decimal
@@ -233,7 +233,7 @@ char Lexer::tnumber(){
 }
 
 char Lexer::tdigits() {
-    char c = this->ch;
+    char c = _ch;
     
     if (!isdigit(c)) 
         lex_error(this, "number expected, but got: %c", c);
@@ -242,7 +242,7 @@ char Lexer::tdigits() {
         c = step();
     }
     if (isalpha(c)) {
-        lex_error(this, "malformed number near %s, expected number, but got: %c", this->ahead.buf, c);
+        lex_error(this, "malformed number near %s, expected number, but got: %c", _ahead.buf, c);
     }
     return c;
 }
