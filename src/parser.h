@@ -15,12 +15,35 @@ public:
     ~Parser();
 
     void parse();
+    void parse_error(char *fmt, ...);
 
 private:
-    void stat();
-    void if_stat();
-    void while_stat();
+    int token(int tk);
+    int chunk();
+    int stat();
+    int laststat();
+    int ifstat();
+    int whilestat();
+    int var();
+    int varlist();
+    int exp();
+    int test_lookahead(int tk);
+    int test_lookahead_n(int n, ...);
+    int test_exp();
 };
+
+/* 
+ * for each rule: 
+ * if the first input did not match the rule, returns P_NOT_MATCH, 
+ * nothing is consumed, else returns P_MATCH;
+ * if the input match the rule, but the further input do not 
+ * match it any more, raise an exception.
+ * 
+ * */
+const int P_NOT_MATCH = 0;
+const int P_MATCH = 1;
+
+struct parse_exception : std::exception {};
 
 }
 

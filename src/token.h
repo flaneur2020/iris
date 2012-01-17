@@ -41,6 +41,7 @@ enum {
     TK_BREAK,
     TK_CONTINUE,
     TK_FUNCTION,
+    TK_RETURN,
     TK_NEWLINE
 };
 

@@ -25,7 +25,9 @@ public:
     ~Lexer();
 
     int next();
-    int lookahead();
+    const Token* current() const;
+    const Token* lookahead() const;
+    void lex_error(char *fmt, ...);
 
 private:
     char next_char();
@@ -42,10 +44,8 @@ private:
     char tdigits();
 };
 
+struct lex_exception : std::exception {};
+
 }
-
-
-#define lex_error(lp, fmt, ...) \
-    do { fprintf(stderr, "Lex Error: %s:%d:%d: " fmt "\n", (lp)->_file_name, (lp)->_line, (lp)->_col, ##__VA_ARGS__); exit(1); } while (0)
 
 #endif

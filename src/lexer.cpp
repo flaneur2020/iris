@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdio>
+#include <cstdarg>
 #include <cstring>
 #include <map>
 #include "lexer.h"
@@ -41,6 +42,11 @@ Lexer::~Lexer() {
 
 /* ----------------------------------------------------- */
 
+/*
+ * Move the ahead token to current, and get the next token
+ * to ahead.
+ * Returns 0 on reached EOF, or an lex error raised(TODO).
+ * */
 int Lexer::next() {
     _current.token = _ahead.token;
     _current.buf   = _ahead.buf;
@@ -48,8 +54,22 @@ int Lexer::next() {
     return _current.token;
 }
 
-int Lexer::lookahead() {
-    return _ahead.token;
+const Token* Lexer::current() const {
+    return &_current;
+}
+
+const Token* Lexer::lookahead() const {
+    return &_ahead;
+}
+
+void Lexer::lex_error(char *fmt, ...){
+    va_list vp;
+    va_start(vp, fmt); 
+    fprintf(stderr, "Lex error: %s:%d:%d ", _file_name, _line, _col);
+    vfprintf(stderr, fmt, vp);
+    fprintf(stderr, "\n");
+    va_end(vp);
+    throw lex_exception();
 }
 
 /* ----------------------------------------------------- */
@@ -156,7 +176,7 @@ int Lexer::lex() {
             }
             return TK_NAME;
         }
-        lex_error(this, "unkown token: %c", c);
+        lex_error("unkown token: %c", c);
     }
     return 0;
 }
@@ -183,7 +203,7 @@ char Lexer::tstring(char qc) {
         case '\0':
         case '\n':
         case '\r':
-            lex_error(this, "unfinished string");
+            lex_error("unfinished string");
         case '\\':
             switch(c = step()) {
             case 'n': consume('\n'); break;
@@ -236,13 +256,13 @@ char Lexer::tdigits() {
     char c = _ch;
     
     if (!isdigit(c)) 
-        lex_error(this, "number expected, but got: %c", c);
+        lex_error("number expected, but got: %c", c);
     while (isdigit(c)) {
         consume(c);
         c = step();
     }
     if (isalpha(c)) {
-        lex_error(this, "malformed number near %s, expected number, but got: %c", _ahead.buf, c);
+        lex_error("malformed number near %s, expected number, but got: %c", _ahead.buf, c);
     }
     return c;
 }
