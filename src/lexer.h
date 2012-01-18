@@ -27,7 +27,8 @@ public:
     int next();
     const Token* current() const;
     const Token* lookahead() const;
-    void lex_error(const char *fmt, ...);
+    int line() const;
+    int col() const;
 
 private:
     char next_char();
@@ -36,6 +37,7 @@ private:
     char consume(char c);
     void reset_buf();
     int lex();
+    void lex_error(const char *fmt, ...);
 
     char tname();
     char tnumber();

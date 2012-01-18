@@ -23,7 +23,7 @@ void Parser::parse(){
 void Parser::parse_error(char *fmt, ...){
     va_list vp;
     va_start(vp, fmt); 
-    fprintf(stderr, "Parse error: ");
+    fprintf(stderr, "Parse error: line %d: ", _lexer.line());
     vfprintf(stderr, fmt, vp);
     fprintf(stderr, "\n");
     va_end(vp);
@@ -33,8 +33,8 @@ void Parser::parse_error(char *fmt, ...){
 /* --------------------------------------------------- */
 
 void Parser::token(int tk){
-    if (_lexer.current()->token != tk) 
-        parse_error("%s expected, but got: %s", tk2str(tk), tk2str(_lexer.current()->token));
+    if (_lexer.lookahead()->token != tk) 
+        parse_error("%s expected, but got: %s: %s", tk2str(tk), tk2str(_lexer.lookahead()->token), _lexer.lookahead()->buf.c_str());
     _lexer.next();
 }
 
@@ -137,10 +137,10 @@ void Parser::var() {
 }
 
 int Parser::test_var() const {
-    if (! test_lookahead_n(2, TK_NAME, '(')) {
-        return P_NOT_MATCH;
+    if (test_lookahead_n(2, TK_NAME, '(')) {
+        return P_MATCH;
     }
-    return P_MATCH;
+    return P_NOT_MATCH;
 }
 
 // varSuffix: nameAndArgs* ('[' exp ']' | '.' NAME);
@@ -225,6 +225,7 @@ void Parser::table_literal() {
 }
 
 int Parser::test_table_literal() const {
+    return 0;
 }
 
 // fieldlist : field (fieldsep field)* (fieldsep)?;
@@ -232,6 +233,7 @@ void Parser::fieldlist() {
 }
 
 int Parser::test_fieldlist() const {
+    return 0;
 }
 
 // field : '[' exp ']' '=' exp | NAME '=' exp | exp;
@@ -239,6 +241,7 @@ void Parser::field() {
 }
 
 int Parser::test_field() const {
+    return 0;
 }
 
 
@@ -249,6 +252,7 @@ void Parser::exp(){
 }
 
 int Parser::test_exp() const {
+    return 0;
 }
 
 // explist1 : (exp ',')* exp;
@@ -256,6 +260,7 @@ void Parser::explist() {
 }
 
 int Parser::test_explist() const {
+    return 0;
 }
 
 // functioncall: varOrExp nameAndArgs+;
@@ -263,6 +268,7 @@ void Parser::func_call() {
 }
 
 int Parser::test_func_call() const {
+    return 0;
 }
 
 /* --------------------------------------------------- */
@@ -282,7 +288,7 @@ int Parser::test_lookahead_n(int n, ...) const {
     int r = P_NOT_MATCH;
 
     for (i = 0; i < n; i++) {
-        arg = va_arg(vp, typeof(TK_NIL));
+        arg = va_arg(vp, int);
         if (_lexer.lookahead()->token == arg) {
             r = P_MATCH;
         }

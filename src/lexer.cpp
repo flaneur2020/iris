@@ -67,6 +67,16 @@ const Token* Lexer::lookahead() const {
     return &_ahead;
 }
 
+int Lexer::line() const {
+    return _line;
+}
+
+int Lexer::col() const {
+    return _col;
+}
+
+/* ------------------------------------------- */
+
 void Lexer::lex_error(const char *fmt, ...){
     va_list vp;
     va_start(vp, fmt); 
@@ -150,7 +160,7 @@ int Lexer::lex() {
         // newline
         if (strchr("\n\r", c)) {
             step();
-            return TK_NEWLINE;
+            continue;
         }
         // skip the whitespaces
         if (isspace(c)) {
