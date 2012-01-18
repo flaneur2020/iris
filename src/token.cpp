@@ -37,6 +37,8 @@ const char* iris::tk2str(int t){
     case TK_CONTINUE: return "continue";
     case TK_LOCAL: return "local";
     case TK_FUNCTION: return "function";
+    case TK_DO: return "do";
+    case TK_REPEAT: return "repeat";
     case TK_RETURN: return "return";
     default: return "<unkown token>";
     }

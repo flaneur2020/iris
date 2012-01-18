@@ -37,6 +37,8 @@ enum {
     TK_LOCAL,
     TK_NIL,
     TK_FOR,
+    TK_DO,
+    TK_REPEAT,
     TK_WHILE,
     TK_BREAK,
     TK_CONTINUE,

@@ -32,23 +32,26 @@ void Parser::parse_error(char *fmt, ...){
 
 /* --------------------------------------------------- */
 
-int Parser::token(int tk){
+void Parser::token(int tk){
     if (_lexer.current()->token != tk) 
         parse_error("%s expected, but got: %s", tk2str(tk), tk2str(_lexer.current()->token));
     _lexer.next();
-    return P_MATCH;
 }
 
 // chunk : (stat (';')?)* (laststat (';')?)?;
-int Parser::chunk(){
-    do {
-        if (stat() == P_NOT_MATCH) 
-            break;
+void Parser::chunk(){
+    while (test_stat()) {
+        stat();
         if (test_lookahead(';')) {
-            _lexer.next();
+            token(';');
         }
-    } while(1);
-    return P_MATCH;
+    }
+    if (test_laststat()) {
+        laststat();
+        if (test_lookahead(';')) {
+            token(';');
+        }
+    }
 }
 
 /*
@@ -65,7 +68,7 @@ int Parser::chunk(){
  *	'local' namelist ('=' explist1)? ;
  *
  * */
-int Parser::stat(){
+void Parser::stat(){
     if (test_varlist() != P_NOT_MATCH) {
         varlist();
         token('=');
@@ -73,7 +76,7 @@ int Parser::stat(){
     }
 }
 
-int Parser::test_stat(){
+int Parser::test_stat() const {
     if (test_varlist() || test_func_call()) {
         return P_MATCH;
     }
@@ -90,21 +93,25 @@ int Parser::test_stat(){
     return P_NOT_MATCH;
 }
 
-int Parser::laststat(){
+void Parser::laststat(){
     if (test_lookahead(TK_RETURN)) {
     }
+}
+
+// laststat : 'return' (explist1)? | 'break';
+int Parser::test_laststat() const {
 }
 
 /*
  * varlist : var (',' var)*;
  * */
-int Parser::varlist() {
+void Parser::varlist() {
     var();
     while(test_lookahead(',')) {
         token(',');
         var();
     }
-    return 0;
+    return;
 }
 
 int Parser::test_varlist() const {
@@ -114,7 +121,7 @@ int Parser::test_varlist() const {
 }
 
 // var: (NAME | '(' exp ')' varSuffix) varSuffix*;
-int Parser::var() {
+void Parser::var() {
     if (test_lookahead(TK_NAME)) {
         token(TK_NAME);
     }
@@ -129,7 +136,7 @@ int Parser::var() {
     }
 }
 
-int Parser::test_var() {
+int Parser::test_var() const {
     if (! test_lookahead_n(2, TK_NAME, '(')) {
         return P_NOT_MATCH;
     }
@@ -137,7 +144,7 @@ int Parser::test_var() {
 }
 
 // varSuffix: nameAndArgs* ('[' exp ']' | '.' NAME);
-int Parser::var_suffix() {
+void Parser::var_suffix() {
     while(test_name_and_args()) {
         name_and_args();
     }
@@ -145,17 +152,17 @@ int Parser::var_suffix() {
         token('[');
         exp();
         token(']');
-        return P_MATCH;
+        return;
     }
     if (test_lookahead('.')) {
         token('.');
         token(TK_NAME);
-        return P_MATCH;
+        return;
     }
     parse_error("bad var suffix");
 }
 
-int Parser::test_var_suffix() {
+int Parser::test_var_suffix() const {
     if (test_name_and_args()) {
         return P_MATCH;
     }
@@ -168,7 +175,7 @@ int Parser::test_var_suffix() {
 /*
  * nameAndArgs: (':' NAME)? args;
  * */
-int Parser::name_and_args() {
+void Parser::name_and_args() {
     if (test_lookahead(':')) {
         token(':');
         token(TK_NAME);
@@ -185,41 +192,77 @@ int Parser::test_name_and_args() const {
 }
 
 // args :  '(' (explist1)? ')' | tableconstructor | string ;
-int Parser::args(){
+void Parser::args(){
     if (test_lookahead('(')) {
         token('(');
         if (test_explist()) 
             explist();
         token(')');
-        return P_MATCH;
+        return;
     }
-    if (test_table_constructor()) {
-        table_constructor();
-        return P_MATCH;
+    if (test_table_literal()) {
+        table_literal();
+        return;
     }
     if (test_lookahead(TK_STRING)) {
         token(TK_STRING);
-        return P_MATCH;
+        return;
     }
 
         
 }
 
-int Parser::test_args() {
+int Parser::test_args() const {
     if (test_lookahead_n(2, '(', TK_STRING))
         return P_MATCH;
-    if (test_table_constructor())
+    if (test_table_literal())
         return P_MATCH;
     return P_NOT_MATCH;
 }
 
+// tableconstructor : '{' (fieldlist)? '}';
+void Parser::table_literal() {
+}
+
+int Parser::test_table_literal() const {
+}
+
+// fieldlist : field (fieldsep field)* (fieldsep)?;
+void Parser::fieldlist() {
+}
+
+int Parser::test_fieldlist() const {
+}
+
+// field : '[' exp ']' '=' exp | NAME '=' exp | exp;
+void Parser::field() {
+}
+
+int Parser::test_field() const {
+}
+
+
 /*
  * exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefixexp | tableconstructor | unop exp) (binop exp)* ;
  * */
-int Parser::exp(){
+void Parser::exp(){
 }
 
-int Parser::test_exp() {
+int Parser::test_exp() const {
+}
+
+// explist1 : (exp ',')* exp;
+void Parser::explist() {
+}
+
+int Parser::test_explist() const {
+}
+
+// functioncall: varOrExp nameAndArgs+;
+void Parser::func_call() {
+}
+
+int Parser::test_func_call() const {
 }
 
 /* --------------------------------------------------- */
