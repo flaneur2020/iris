@@ -18,6 +18,9 @@ const char* iris::tk2str(int t){
     case '(': return "(";
     case ')': return ")";
     case ';': return ";";
+    case '=': return "=";
+    case '[': return "[";
+    case ']': return "]";
     case TK_NEWLINE: return "NEWLINE";
     case TK_GTE: return "GTE";
     case TK_LTE: return "LTE";

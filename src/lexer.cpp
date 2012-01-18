@@ -158,7 +158,7 @@ int Lexer::lex() {
             continue;
         }
         // single character tokens
-        if (strchr(",.+:*/{}()", c)) {
+        if (strchr(",.+:;*/{}()[]", c)) {
             step();
             return c;
         }

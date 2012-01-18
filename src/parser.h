@@ -7,11 +7,11 @@ namespace iris {
 
 class Parser {
     FILE *_file;
-    char *_file_name;
+    const char *_file_name;
     Lexer _lexer;
 
 public:
-    Parser(FILE *file, char *file_name);
+    Parser(FILE *file, const char *file_name);
     ~Parser();
 
     void parse();
@@ -27,9 +27,9 @@ private:
     int var();
     int varlist();
     int exp();
-    int test_lookahead(int tk);
-    int test_lookahead_n(int n, ...);
-    int test_exp();
+    int test_lookahead(int tk) const;
+    int test_lookahead_n(int n, ...) const;
+    int test_exp() const;
 };
 
 /* 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "iris.h"
 #include "lexer.h"
+#include "parser.h"
 
 using namespace std;
 using namespace iris;
@@ -8,11 +9,8 @@ using namespace iris;
 int main(int argc, char* argv[]){
     const char *path = "test/sample.lua";
     FILE *fp = fopen(path, "r");
-    Lexer lexer(fp, path);
-    int tk;
+    Parser parser(fp, path);
     
-    while ((tk = lexer.next())) {
-        cout << tk2str(tk) << endl;
-    }
+    parser.parse();
     return 0;
 }
