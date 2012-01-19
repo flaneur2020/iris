@@ -131,37 +131,46 @@ int Lexer::lex() {
         reset_buf();
         if (c == '<') {
             c = step();
-            if (c == '=')  
+            if (c == '=') {
+                step();
                 return TK_LTE;
+            }
             return '<';
         }
         if (c == '>') {
             c = step();
-            if (c == '=')  
+            if (c == '=') {
+                step();
                 return TK_GTE;
+            }
             return '>';
         }
         if (c == '-') {
             c = step();
-            if (c != '-')
-                return '-';
+            if (c == '-') {
+                step_until("\n\r");
+                continue;
+            }
             // else it's a comment
-            step_until("\n\r");
-            continue;
+            return '-';
         }
         // assign or eual
         if (c == '=') {
             c = step();
-            if (c != '=')
+            if (c != '=') {
+                step();
                 return '=';
+            }
             step();
             return TK_EQ;
         }
         // ~=
         if (c == '~') {
             c = step();
-            if (c != '=')
+            if (c != '=') {
+                step();
                 return '~';
+            }
             step();
             return TK_MATCH;
         }
