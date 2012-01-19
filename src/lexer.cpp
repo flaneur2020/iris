@@ -157,6 +157,14 @@ int Lexer::lex() {
             step();
             return TK_EQ;
         }
+        // ~=
+        if (c == '~') {
+            c = step();
+            if (c != '=')
+                return '~';
+            step();
+            return TK_MATCH;
+        }
         // newline
         if (strchr("\n\r", c)) {
             step();
@@ -167,8 +175,19 @@ int Lexer::lex() {
             tspaces();
             continue;
         }
+        // dots '...'
+        if (c == '.') {
+            c = step();
+            if ( c != '.')
+                return '.';
+            c = step();
+            if ( c != '.')
+                lex_error("unkown token: '..'");
+            step();
+            return TK_DOTS;
+        }
         // single character tokens
-        if (strchr(",.+:;*/{}()[]", c)) {
+        if (strchr("=,.+:;*/%#{}()[]", c)) {
             step();
             return c;
         }

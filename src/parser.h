@@ -15,11 +15,12 @@ public:
     ~Parser();
 
     void parse();
-    void parse_error(char *fmt, ...);
+    void parse_error(const char *fmt, ...);
 
 private:
     void token(int tk);
     void chunk();
+    void block();
     void stat();
     void laststat();
     void ifstat();
@@ -32,12 +33,18 @@ private:
     void explist();
     void args();
     void func_call();
+    void prefix_exp();
     void table_literal();
     void field();
     void fieldlist();
+    void func();
+    void var_or_exp();
+    void func_body();
+    void parlist1();
+    void namelist();
 
     int test_lookahead(int tk) const;
-    int test_lookahead_n(int n, ...) const;
+    int test_lookahead_n(int arg0, ...) const;
     int test_chunk() const;
     int test_stat() const;
     int test_laststat() const;
@@ -47,11 +54,18 @@ private:
     int test_name_and_args() const;
     int test_exp() const;
     int test_explist() const;
+    int test_parlist1() const;
     int test_args() const;
-    int test_func_call() const;
+    int test_prefix_exp() const;
     int test_table_literal() const;
     int test_field() const;
     int test_fieldlist() const;
+    int test_func() const;
+    int test_func_call() const;
+    int test_func_body() const;
+    int test_unop() const;
+    int test_var_or_exp() const;
+    int test_namelist() const;
 
 };
 

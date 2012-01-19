@@ -29,10 +29,15 @@ enum {
     TK_LTE,
     TK_GTE,
     TK_EQ,
+    TK_DOTS,
     // keywords
     TK_KW, // as a delimeter
+    TK_NOT,
     TK_AND,
     TK_OR,
+    TK_TRUE,
+    TK_FALSE,
+    TK_MATCH,
     TK_IF,
     TK_LOCAL,
     TK_NIL,
@@ -44,12 +49,14 @@ enum {
     TK_CONTINUE,
     TK_FUNCTION,
     TK_RETURN,
+    TK_END,
     TK_NEWLINE
 };
 
 static int tkkeywords[] = { 
-    TK_AND, TK_OR, TK_IF, TK_LOCAL, TK_NIL, 
-    TK_FOR, TK_WHILE, TK_BREAK, TK_CONTINUE, TK_FUNCTION 
+    TK_AND, TK_OR, TK_TRUE, TK_FALSE, TK_IF, TK_LOCAL, TK_NIL,
+    TK_FOR, TK_DO, TK_REPEAT, TK_WHILE, TK_BREAK, TK_CONTINUE,
+    TK_FUNCTION, TK_RETURN, TK_NOT, TK_END
 };
 
 const int NTKKEYWORDS = sizeof(tkkeywords) / sizeof(int);
