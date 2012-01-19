@@ -26,6 +26,7 @@ const char* iris::tk2str(int t){
     case TK_OR: return "or";
     case TK_NOT: return "not";
     case TK_IF: return "if"; 
+    case TK_THEN: return "then"; 
     case TK_NIL: return "nil";
     case TK_FOR: return "for";
     case TK_WHILE: return "while";
@@ -36,6 +37,9 @@ const char* iris::tk2str(int t){
     case TK_DO: return "do";
     case TK_END: return "end";
     case TK_REPEAT: return "repeat";
+    case TK_ELSE: return "else";
+    case TK_ELSE_IF: return "elseif";
+    case TK_IN: return "in";
     case TK_RETURN: return "return";
     default: return "<unkown token>";
     }

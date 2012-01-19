@@ -32,14 +32,15 @@ private:
     void exp();
     void explist();
     void args();
-    void func_call();
     void prefix_exp();
     void table_literal();
     void field();
     void fieldlist();
     void func();
-    void var_or_exp();
     void func_body();
+    void func_call();
+    void func_name();
+    void var_or_exp();
     void parlist1();
     void namelist();
 
@@ -63,6 +64,7 @@ private:
     int test_func() const;
     int test_func_call() const;
     int test_func_body() const;
+    int test_func_name() const;
     int test_unop() const;
     int test_var_or_exp() const;
     int test_namelist() const;

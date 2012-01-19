@@ -18,7 +18,7 @@ Lexer::Lexer(FILE *file, const char *file_name)
     , _file_name(file_name)
     , _current()
     , _ahead()
-    , _line(0)
+    , _line(1)
     , _col(0)
     , _ch('\0')
 {
