@@ -25,8 +25,8 @@ public:
     ~Lexer();
 
     int next();
-    const Token* current() const;
-    const Token* lookahead() const;
+    const Token& current() const;
+    const Token& lookahead() const;
     int line() const;
     int col() const;
 

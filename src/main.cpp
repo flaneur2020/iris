@@ -12,7 +12,7 @@ void test_lexer() {
     FILE *fp = fopen(path, "r");
     Lexer lexer(fp, path);
     while(int t = lexer.next()){
-        printf("- %s %s\n", tk2str(t), lexer.current()->buf.c_str());
+        printf("- %s %s\n", tk2str(t), lexer.current().buf.c_str());
     }
 }
 
@@ -24,6 +24,7 @@ void test_parser() {
 }
 
 int main(int argc, char* argv[]){
+    test_lexer();
     test_parser();
 
     return 0;

@@ -59,12 +59,12 @@ int Lexer::next() {
     return _current.token;
 }
 
-const Token* Lexer::current() const {
-    return &_current;
+const Token& Lexer::current() const {
+    return _current;
 }
 
-const Token* Lexer::lookahead() const {
-    return &_ahead;
+const Token& Lexer::lookahead() const {
+    return _ahead;
 }
 
 int Lexer::line() const {
@@ -157,12 +157,11 @@ int Lexer::lex() {
         // assign or eual
         if (c == '=') {
             c = step();
-            if (c != '=') {
+            if (c == '=') {
                 step();
-                return '=';
+                return TK_EQ;
             }
-            step();
-            return TK_EQ;
+            return '=';
         }
         // ~=
         if (c == '~') {
