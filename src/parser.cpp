@@ -35,6 +35,7 @@ void Parser::parse_error(const char *fmt, ...) {
 
 // on tk == 0, any token is matched.
 void Parser::token(int tk){
+    p_debug("> token %s\n", tk2str(tk));
     if ((tk != 0) && (!test_lookahead(tk)))  {
         parse_error("bad token. expected '%s'", tk2str(tk));
     }
@@ -43,7 +44,7 @@ void Parser::token(int tk){
 
 // chunk : (stat (';')?)* (last_stat (';')?)?;
 void Parser::chunk(){
-    iris_debug("> chunk\n");
+    p_debug("> chunk\n");
     while (test_stat()) {
         stat();
         if (test_lookahead(';')) {
@@ -71,23 +72,23 @@ void Parser::block() {
  *	'repeat' block 'until' exp | 
  *	'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' | 
  *	'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
- *	'for' namelist 'in' explist1 'do' block 'end' | 
+ *	'for' namelist 'in' explist 'do' block 'end' | 
  *	'function' funcname funcbody | 
  *	'local' 'function' NAME funcbody | 
- *	'local' namelist ('=' explist1)? |
+ *	'local' namelist ('=' explist)? |
  *
  * */
 void Parser::stat(){
     int t;
     int t2;
 
-    iris_debug("> stat\n");
-    iris_debug("\t ahead(): %s\n", _lexer.lookahead().buf.c_str());
+    p_debug("> stat\n");
+    p_debug("\t ahead(): %s\n", _lexer.lookahead().buf.c_str());
     // assignment or function call
     if (test_lvalue_or_fcall()) {
         t = lvalue_or_fcall();
         if (t == P_LVALUE) {
-            iris_debug("lvalue\n");
+            p_debug("lvalue\n");
             while (test_lookahead(',')) {
                 t2 = lvalue_or_fcall();
                 if (t2 != P_LVALUE) {
@@ -98,7 +99,7 @@ void Parser::stat(){
             explist();
         }
         else if (t == P_FCALL) {
-            iris_debug("func call\n");
+            p_debug("func call\n");
         }
     }
     else if (test_lookahead(TK_DO)) {
@@ -138,7 +139,7 @@ void Parser::stat(){
         token(TK_END);
     }
     // 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
-    // 'for' NAME (, namelist1)? 'in' explist1 'do' block 'end' | 
+    // 'for' NAME (, namelist1)? 'in' explist 'do' block 'end' | 
     else if (test_lookahead(TK_FOR)) {
         token(TK_FOR);
         token(TK_NAME);
@@ -175,7 +176,7 @@ void Parser::stat(){
         func_body();
     }
     // 'local' 'function' NAME funcbody | 
-    // 'local' namelist ('=' explist1)? ;
+    // 'local' namelist ('=' explist)? ;
     else if (test_lookahead(TK_LOCAL)) {
         token(TK_LOCAL);
         if (test_lookahead(TK_FUNCTION)) {
@@ -207,9 +208,9 @@ int Parser::test_stat() const {
         || test_exp();
 }
 
-// last_stat : 'return' (explist1)? | 'break';
+// last_stat : 'return' (explist)? | 'break';
 void Parser::last_stat(){
-    iris_debug("> last_stat");
+    p_debug("> last_stat");
     if (test_lookahead(TK_RETURN)) {
         token(TK_RETURN);
         if (test_explist()) {
@@ -229,10 +230,10 @@ int Parser::test_last_stat() const {
 }
 
 /*
- * exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefixexp | tableconstructor | unop exp) (binop exp)* ;
+ * exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefix_exp | lvalue_or_fcall | tableconstructor | unop exp | ) (binop exp)* ;
  * */
 void Parser::exp(){
-    iris_debug("> exp\n");
+    p_debug("> exp\n");
     if (test_lookahead_n(TK_NIL, TK_FALSE, TK_TRUE, TK_NUMBER, TK_STRING, TK_DOTS, 0)) {
         token(0);
     } 
@@ -240,21 +241,24 @@ void Parser::exp(){
         token(TK_FUNCTION);
         func_body();
     }
-    else if (test_prefix_exp()){
+    else if (test_lookahead('(')) {
         prefix_exp();
+    }
+    else if (test_lvalue_or_fcall()){
+        lvalue_or_fcall();
     }
     else if (test_table_constructor()) {
         table_constructor();
     }
-    else if (test_lookahead_n('-', TK_NOT, '#', 0)) {
+    else if (test_unop()) {
         token(0);
         exp();
     }
     else {
-        parse_error("bad exp. exptected 'nil', 'false', 'true', number, string, '...', function, prefixexp, table literal, or unop exp");
+        parse_error("bad exp. exptected 'nil', 'false', 'true', number, string, '...', function, lvalue, function call, table literal, or unop exp");
     }
 
-    while (test_unop()) {
+    while (test_binop()) {
         token(0);
         exp();
     }
@@ -268,7 +272,11 @@ int Parser::test_exp() const {
         || test_unop();
 }
 
-int Parser::test_unop() const { 
+int Parser::test_unop() const {
+    return test_lookahead_n('-', TK_NOT, '#');
+}
+
+int Parser::test_binop() const { 
     return test_lookahead_n('+' , '-', '*', '/', '^', '%', TK_DOTS, '<', TK_LTE, '>', TK_GTE, TK_EQ, TK_MATCH, TK_AND, TK_OR, 0);
 }
 
@@ -339,9 +347,9 @@ int Parser::test_namelist() const {
     return test_lookahead(TK_NAME);
 }
 
-// explist1 : exp (',' exp )*;
+// explist : exp (',' exp )*;
 void Parser::explist() {
-    iris_debug("> explist\n");
+    p_debug("> explist\n");
     exp();
     while (test_lookahead(',')) {
         token(',');
@@ -353,9 +361,9 @@ int Parser::test_explist() const {
     return test_exp();
 }
 
-// func_args :  '(' (explist1)? ')' | tableconstructor | string ;
+// func_args :  '(' (explist)? ')' | tableconstructor | string ;
 void Parser::func_args(){
-    iris_debug("> func_args\n");
+    p_debug("> func_args\n");
     if (test_lookahead('(')) {
         token('(');
         if (test_explist()) 
@@ -380,7 +388,7 @@ int Parser::test_func_args() const {
 
 // tableconstructor : '{' (field ((','|';') field)* (','|';')?)? '}';
 void Parser::table_constructor() {
-    iris_debug("> table_constructor");
+    p_debug("> table_constructor");
     token('{');
     if (test_field()) {
         field();
@@ -425,8 +433,9 @@ int Parser::test_field() const {
         || test_exp();
 }
 
-// lvalue_or_fcall: prefixexp ( '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs )*
+// lvalue_or_fcall: prefix_exp ( '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs )*
 int Parser::lvalue_or_fcall() {
+    p_debug("> lvalue_or_fcall\n");
     int t = P_LVALUE;
 
     prefix_exp();
@@ -460,9 +469,9 @@ int Parser::test_lvalue_or_fcall() const {
     return test_prefix_exp();
 } 
 
-// prefixexp: NAME | '(' exp ')'
+// prefix_exp: NAME | '(' exp ')'
 void Parser::prefix_exp() {
-    iris_debug("> prefix_exp\n");
+    p_debug("> prefix_exp\n");
     if (test_lookahead(TK_NAME)) {
         token(TK_NAME);
     }
@@ -504,4 +513,13 @@ int Parser::test_lookahead_n(int arg0, ...) const {
     return P_NOT_MATCH;
 }
 
+void Parser::p_debug(const char* fmt, ...) {
+    #ifdef NDEBUG
+    va_list vp;
+    va_start(vp, fmt); 
+    vfprintf(stderr, fmt, vp);
+    fprintf(stderr, "\t %s\n", _lexer.lookahead().buf.c_str());
+    va_end(vp);
+#endif
+}
 

@@ -6,7 +6,7 @@ using namespace iris;
 const char* iris::tk2str(int t){
     char *str;
     // if it's an single-character token
-    static char tkmem[] = ",\0-\0.^\0<\0>\0\0+\0:\0;\0*\0/\0%\0#\0{\0}\0(\0)\0[\0]\0=\0";
+    static char tkmem[] = ",\0-\0.\0^\0<\0>\0\0+\0:\0;\0*\0/\0%\0#\0{\0}\0(\0)\0[\0]\0=\0";
     if (str = (char*)memchr(tkmem, t, sizeof(tkmem))) 
         return str;
     // if it's an non-terminal token

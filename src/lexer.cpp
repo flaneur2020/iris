@@ -157,12 +157,11 @@ int Lexer::lex() {
         // assign or eual
         if (c == '=') {
             c = step();
-            if (c != '=') {
+            if (c == '=') {
                 step();
-                return '=';
+                return TK_EQ;
             }
-            step();
-            return TK_EQ;
+            return '=';
         }
         // ~=
         if (c == '~') {

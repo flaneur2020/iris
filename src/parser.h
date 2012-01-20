@@ -18,6 +18,8 @@ public:
     void parse_error(const char *fmt, ...);
 
 private:
+    void p_debug(const char* fmt, ...);
+
     void token(int tk);
     void chunk();
     void block();
@@ -53,6 +55,7 @@ private:
     int test_func_name() const;
     int test_func_args() const;
     int test_unop() const;
+    int test_binop() const;
     int test_namelist() const;
 
 };
