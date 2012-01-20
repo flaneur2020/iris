@@ -65,7 +65,7 @@ void Parser::block() {
 
 /*
  * stat :  
- *	primary_expr | -- assignment or func call
+ *	lvalue_or_fcall | -- assignment or func call
  *	'do' block 'end' | 
  *	'while' exp 'do' block 'end' | 
  *	'repeat' block 'until' exp | 
@@ -78,10 +78,28 @@ void Parser::block() {
  *
  * */
 void Parser::stat(){
+    int t;
+    int t2;
+
     iris_debug("> stat\n");
     iris_debug("\t ahead(): %s\n", _lexer.lookahead().buf.c_str());
     // assignment or function call
-    if (0) {
+    if (test_lvalue_or_fcall()) {
+        t = lvalue_or_fcall();
+        if (t == P_LVALUE) {
+            iris_debug("lvalue\n");
+            while (test_lookahead(',')) {
+                t2 = lvalue_or_fcall();
+                if (t2 != P_LVALUE) {
+                    parse_error("bad assignment, expected left value");
+                }
+            }
+            token('=');
+            explist();
+        }
+        else if (t == P_FCALL) {
+            iris_debug("func call\n");
+        }
     }
     else if (test_lookahead(TK_DO)) {
         token(TK_DO);
@@ -184,7 +202,7 @@ void Parser::stat(){
 }
 
 int Parser::test_stat() const {
-    return test_var()
+    return test_lvalue_or_fcall()
         || test_lookahead_n(TK_DO, TK_WHILE, TK_REPEAT, TK_IF, TK_FOR, TK_FUNCTION, TK_LOCAL, 0)
         || test_exp();
 }
@@ -407,34 +425,40 @@ int Parser::test_field() const {
         || test_exp();
 }
 
-// primaryexp: prefixexp ( '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs )*
-void Parser::primary_exp() {
+// lvalue_or_fcall: prefixexp ( '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs )*
+int Parser::lvalue_or_fcall() {
+    int t = P_LVALUE;
+
     prefix_exp();
     while (test_lookahead_n('.', '[', ':', 0) || test_func_args()) {
         if (test_lookahead('.')) {
             token('.');
             token(TK_NAME);
+            t = P_LVALUE;
         }
         else if (test_lookahead('[')) {
             token('[');
             exp();
             token(']');
+            t = P_LVALUE;
         }
         else if (test_lookahead(':')) {
             token(':');
             token(TK_NAME);
             func_args();
+            t = P_FCALL;
         }
         else if (test_func_args()) {
             func_args();
+            t = P_FCALL;
         }
     }
+    return t;
 }
 
-int Parser::test_primary_exp() const {
+int Parser::test_lvalue_or_fcall() const {
     return test_prefix_exp();
 } 
-
 
 // prefixexp: NAME | '(' exp ')'
 void Parser::prefix_exp() {
