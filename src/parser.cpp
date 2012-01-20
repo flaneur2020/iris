@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdarg>
+#include "iris.h"
 #include "parser.h"
 
 using namespace iris;
@@ -42,6 +43,7 @@ void Parser::token(int tk){
 
 // chunk : (stat (';')?)* (laststat (';')?)?;
 void Parser::chunk(){
+    iris_debug("> chunk\n");
     while (test_stat()) {
         stat();
         if (test_lookahead(';')) {
@@ -62,9 +64,162 @@ void Parser::block() {
 }
 
 /*
+ * stat :  var (',' var)* '=' exp (',' exp )*; | 
+ *	(var | '(' exp ')') nameAndArgs+ | -- function call
+ *	'do' block 'end' | 
+ *	'while' exp 'do' block 'end' | 
+ *	'repeat' block 'until' exp | 
+ *	'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' | 
+ *	'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
+ *	'for' namelist 'in' explist1 'do' block 'end' | 
+ *	'function' funcname funcbody | 
+ *	'local' 'function' NAME funcbody | 
+ *	'local' namelist ('=' explist1)? ;
+ *
+ * */
+void Parser::stat(){
+    iris_debug("> stat\n");
+    if (test_varlist()) {
+        varlist();
+        token('=');
+        explist();
+    }
+    else if (test_func_call()) {
+        func_call();
+    }
+    else if (test_lookahead(TK_DO)) {
+        token(TK_DO);
+        block();
+        token(TK_END);
+    }
+    else if (test_lookahead(TK_WHILE)) {
+        token(TK_WHILE);
+        exp();
+        token(TK_DO);
+        block();
+        token(TK_END);
+    }
+    else if (test_lookahead(TK_REPEAT)) {
+        token(TK_REPEAT);
+        block();
+        token(TK_UNTIL);
+        exp();
+    }
+    // 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' | 
+    else if (test_lookahead(TK_IF)) {
+        token(TK_IF);
+        exp();
+        token(TK_THEN);
+        block();
+        while(test_lookahead(TK_ELSE_IF)) {
+            token(TK_ELSE_IF);
+            exp();
+            token(TK_THEN);
+            block();
+        }
+        if (test_lookahead(TK_ELSE)) {
+            token(TK_ELSE);
+            block();
+        }
+        token(TK_END);
+    }
+    // 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
+    // 'for' NAME (, namelist1)? 'in' explist1 'do' block 'end' | 
+    else if (test_lookahead(TK_FOR)) {
+        token(TK_FOR);
+        token(TK_NAME);
+        if (test_lookahead('=')) {
+            token('=');
+            exp();
+            token(',');
+            exp();
+            if (test_lookahead(',')) {
+                token(',');
+                exp();
+            }
+            token(TK_DO);
+            block();
+            token(TK_END);
+        }
+        else if (test_lookahead(',')) {
+            token(',');
+            namelist();
+            token(TK_IN);
+            explist();
+            token(TK_DO);
+            block();
+            token(TK_END);
+        }
+        else {
+            parse_error("bad for statment");
+        }
+    }
+    // 'function' funcname funcbody | 
+    else if (test_lookahead(TK_FUNCTION)) {
+        token(TK_FUNCTION);
+        func_name();
+        func_body();
+    }
+    // 'local' 'function' NAME funcbody | 
+    // 'local' namelist ('=' explist1)? ;
+    else if (test_lookahead(TK_LOCAL)) {
+        token(TK_LOCAL);
+        if (test_lookahead(TK_FUNCTION)) {
+            token(TK_NAME);
+            func_body();
+        }
+        else if (test_namelist()) {
+            namelist();
+            if (test_lookahead('=')) {
+                token('=');
+                explist();
+            }
+        }
+        else {
+            parse_error("bad 'local' statement");
+        }
+    }
+    else if (test_exp()) {
+        parse_error("bad statement");
+    }
+    else {
+        parse_error("bad statement");
+    }
+}
+
+int Parser::test_stat() const {
+    return test_varlist()
+        || test_func_call()
+        || test_lookahead_n(TK_DO, TK_WHILE, TK_REPEAT, TK_IF, TK_FOR, TK_FUNCTION, TK_LOCAL, 0)
+        || test_exp();
+}
+
+// laststat : 'return' (explist1)? | 'break';
+void Parser::laststat(){
+    iris_debug("> laststat");
+    if (test_lookahead(TK_RETURN)) {
+        token(TK_RETURN);
+        if (test_explist()) {
+            explist();
+        }
+        return;
+    }
+    if (test_lookahead(TK_BREAK)) {
+        token(TK_BREAK);
+        return;
+    }
+    parse_error("bad laststat. expected 'return' or 'break'");
+}
+
+int Parser::test_laststat() const {
+    return test_lookahead_n(TK_RETURN, TK_BREAK, 0);
+}
+
+/*
  * exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefixexp | tableconstructor | unop exp) (binop exp)* ;
  * */
 void Parser::exp(){
+    iris_debug("> exp\n");
     if (test_lookahead_n(TK_NIL, TK_FALSE, TK_TRUE, TK_NUMBER, TK_STRING, TK_DOTS, 0)) {
         token(0);
     } 
@@ -183,6 +338,7 @@ int Parser::test_namelist() const {
 
 // explist1 : exp (',' exp )*;
 void Parser::explist() {
+    iris_debug("> explist\n");
     exp();
     while (test_lookahead(',')) {
         token(',');
@@ -194,152 +350,9 @@ int Parser::test_explist() const {
     return test_exp();
 }
 
-/*
- * stat :  varlist1 '=' explist1 | 
- *	functioncall | 
- *	'do' block 'end' | 
- *	'while' exp 'do' block 'end' | 
- *	'repeat' block 'until' exp | 
- *	'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' | 
- *	'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
- *	'for' namelist 'in' explist1 'do' block 'end' | 
- *	'function' funcname funcbody | 
- *	'local' 'function' NAME funcbody | 
- *	'local' namelist ('=' explist1)? ;
- *
- * */
-void Parser::stat(){
-    if (test_varlist()) {
-        varlist();
-        token('=');
-        explist();
-    }
-    else if (test_func_call()) {
-        func_call();
-    }
-    else if (test_lookahead(TK_DO)) {
-        token(TK_DO);
-        block();
-        token(TK_END);
-    }
-    else if (test_lookahead(TK_WHILE)) {
-        token(TK_WHILE);
-        exp();
-        token(TK_DO);
-        block();
-        token(TK_END);
-    }
-    else if (test_lookahead(TK_REPEAT)) {
-        token(TK_REPEAT);
-        block();
-        token(TK_UNTIL);
-        exp();
-    }
-    // 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' | 
-    else if (test_lookahead(TK_IF)) {
-        token(TK_IF);
-        exp();
-        token(TK_THEN);
-        block();
-        while(test_lookahead(TK_ELSE_IF)) {
-            token(TK_ELSE_IF);
-            exp();
-            token(TK_THEN);
-            block();
-        }
-        if (test_lookahead(TK_ELSE)) {
-            token(TK_ELSE);
-            block();
-        }
-        token(TK_END);
-    }
-    // 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
-    // 'for' NAME (, namelist1)? 'in' explist1 'do' block 'end' | 
-    else if (test_lookahead(TK_FOR)) {
-        token(TK_FOR);
-        token(TK_NAME);
-        if (test_lookahead('=')) {
-            token('=');
-            exp();
-            token(',');
-            exp();
-            if (test_lookahead(',')) {
-                token(',');
-                exp();
-            }
-            token(TK_DO);
-            block();
-            token(TK_END);
-        }
-        else if (test_lookahead(',')) {
-            token(',');
-            namelist();
-            token(TK_IN);
-            explist();
-            token(TK_DO);
-            block();
-            token(TK_END);
-        }
-    }
-    // 'function' funcname funcbody | 
-    else if (test_lookahead(TK_FUNCTION)) {
-        token(TK_FUNCTION);
-        func_name();
-        func_body();
-    }
-    // 'local' 'function' NAME funcbody | 
-    // 'local' namelist ('=' explist1)? ;
-    else if (test_lookahead(TK_LOCAL)) {
-        token(TK_LOCAL);
-        if (test_lookahead(TK_FUNCTION)) {
-            token(TK_NAME);
-            func_body();
-        }
-        else if (test_namelist()) {
-            namelist();
-            if (test_lookahead('=')) {
-                token('=');
-                explist();
-            }
-        }
-        else {
-            parse_error("bad 'local' statement");
-        }
-    }
-    else {
-        parse_error("bad statement");
-    }
-}
-
-int Parser::test_stat() const {
-    return test_varlist()
-        || test_func_call()
-        || test_lookahead_n(TK_DO, TK_WHILE, TK_REPEAT, TK_IF, TK_FOR, TK_FUNCTION, TK_LOCAL, 0);
-}
-
-// laststat : 'return' (explist1)? | 'break';
-void Parser::laststat(){
-    if (test_lookahead(TK_RETURN)) {
-        token(TK_RETURN);
-        if (test_explist()) {
-            explist();
-        }
-        return;
-    }
-    if (test_lookahead(TK_BREAK)) {
-        token(TK_BREAK);
-        return;
-    }
-    parse_error("bad laststat. expected 'return' or 'break'");
-}
-
-int Parser::test_laststat() const {
-    return test_lookahead_n(TK_RETURN, TK_BREAK, 0);
-}
-
-
 // varlist : var (',' var)*;
 void Parser::varlist() {
+    iris_debug("> varlist\n");
     var();
     while(test_lookahead(',')) {
         token(',');
@@ -354,6 +367,7 @@ int Parser::test_varlist() const {
 
 // var: (NAME | '(' exp ')' varSuffix) varSuffix*;
 void Parser::var() {
+    iris_debug("> var\n");
     if (test_lookahead(TK_NAME)) {
         token(TK_NAME);
     }
@@ -378,6 +392,7 @@ int Parser::test_var() const {
 
 // varSuffix: nameAndArgs* ('[' exp ']' | '.' NAME);
 void Parser::var_suffix() {
+    iris_debug("> var_suffix\n");
     while(test_name_and_args()) {
         name_and_args();
     }
@@ -404,6 +419,7 @@ int Parser::test_var_suffix() const {
  * nameAndArgs: (':' NAME)? args;
  * */
 void Parser::name_and_args() {
+    iris_debug("> name_and_args\n");
     if (test_lookahead(':')) {
         token(':');
         token(TK_NAME);
@@ -418,6 +434,7 @@ int Parser::test_name_and_args() const {
 
 // args :  '(' (explist1)? ')' | tableconstructor | string ;
 void Parser::args(){
+    iris_debug("> args\n");
     if (test_lookahead('(')) {
         token('(');
         if (test_explist()) 
@@ -442,6 +459,7 @@ int Parser::test_args() const {
 
 // tableconstructor : '{' (fieldlist)? '}';
 void Parser::table_literal() {
+    iris_debug("> table_literal");
     token('{');
     if (test_fieldlist()) {
         fieldlist();
@@ -455,6 +473,7 @@ int Parser::test_table_literal() const {
 
 // fieldlist : field (fieldsep field)* (fieldsep)?;
 void Parser::fieldlist() {
+    iris_debug("> fieldlist");
     field();
     while(test_lookahead_n(',', ';', 0)) {
         token(0);
@@ -498,6 +517,7 @@ int Parser::test_field() const {
 
 // functioncall: varOrExp nameAndArgs+;
 void Parser::func_call() {
+    iris_debug("> func_call\n");
     var_or_exp();
     do {
         name_and_args();
@@ -510,6 +530,7 @@ int Parser::test_func_call() const {
 
 // prefixexp: varOrExp nameAndArgs*;
 void Parser::prefix_exp() {
+    iris_debug("> prefix_exp\n");
     var_or_exp();
     while(test_name_and_args()) {
         name_and_args();
@@ -522,6 +543,7 @@ int Parser::test_prefix_exp() const {
 
 // varOrExp: var | '(' exp ')';
 void Parser::var_or_exp() {
+    iris_debug("> var_or_exp\n");
     if (test_var()) {
         var();
     }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdarg>
 #include "iris.h"
 #include "lexer.h"
 #include "parser.h"
@@ -23,8 +24,16 @@ void test_parser() {
 }
 
 int main(int argc, char* argv[]){
-    test_lexer();
     test_parser();
 
     return 0;
+}
+
+void iris::iris_debug(const char *fmt, ...) {
+#ifdef NDEBUG
+    va_list vp;
+    va_start(vp, fmt); 
+    vfprintf(stderr, fmt, vp);
+    va_end(vp);
+#endif
 }
