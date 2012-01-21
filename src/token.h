@@ -62,7 +62,7 @@ static int tkkeywords[] = {
     TK_AND, TK_OR, TK_TRUE, TK_FALSE, TK_IF, TK_LOCAL, TK_NIL,
     TK_FOR, TK_DO, TK_REPEAT, TK_WHILE, TK_BREAK, TK_CONTINUE,
     TK_FUNCTION, TK_RETURN, TK_NOT, TK_END, TK_THEN, TK_UNTIL,
-    TK_ELSE_IF, TK_IN
+    TK_ELSE_IF, TK_ELSE, TK_IN
 };
 
 const int NTKKEYWORDS = sizeof(tkkeywords) / sizeof(int);

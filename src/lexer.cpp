@@ -210,7 +210,7 @@ int Lexer::lex() {
             return TK_NUMBER;
         }
         // keyword
-        if (isalpha(c)) {
+        if (isalpha(c) || c == '_') {
             tname();
             ri = kwtab->find(_ahead.buf);
             if (ri != kwtab->end()) {
@@ -273,9 +273,9 @@ char Lexer::tstring(char qc) {
 char Lexer::tname(){
     char c = _ch;
 
-    if (!isalpha(c))  
+    if (!isalpha(c) && c != '_')  
         return c;
-    while(isalpha(c) || isdigit(c)){
+    while(isalpha(c) || isdigit(c) || c == '_'){
         consume(c);
         c = step();
     }

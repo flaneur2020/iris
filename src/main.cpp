@@ -7,8 +7,7 @@
 using namespace std;
 using namespace iris;
 
-void test_lexer() {
-    const char *path = "test/sample.lua";
+void test_lexer(const char *path) {
     FILE *fp = fopen(path, "r");
     Lexer lexer(fp, path);
     while(int t = lexer.next()){
@@ -16,16 +15,16 @@ void test_lexer() {
     }
 }
 
-void test_parser() {
-    const char *path = "test/sample.lua";
+void test_parser(const char *path) {
     FILE *fp = fopen(path, "r");
     Parser parser(fp, path);
     parser.parse();
 }
 
 int main(int argc, char* argv[]){
-    test_lexer();
-    test_parser();
+    const char *path = "test/trace_globals.sample.lua";
+    test_lexer(path);
+    test_parser(path);
 
     return 0;
 }
