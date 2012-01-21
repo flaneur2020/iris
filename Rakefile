@@ -8,7 +8,7 @@ task :build => [:link, :ctags]
 
 mkdir_p 'bin'
 
-cfiles = Dir['src/*.cpp']
+cfiles = Dir['src/*.cc']
 hfiles = Dir['src/*.h']
 ofiles = cfiles.map{|fn_c| 'bin/' + File.basename(fn_c).ext('o') }
 

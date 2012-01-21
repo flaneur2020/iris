@@ -87,47 +87,50 @@ void Parser::stat(){
     // assignment or function call
     if (test_lvalue_or_fcall()) {
         t = lvalue_or_fcall();
-        if (t == P_LVALUE) {
-            p_debug("lvalue\n");
-            while (test_lookahead(',')) {
-                t2 = lvalue_or_fcall();
-                if (t2 != P_LVALUE) {
-                    parse_error("bad assignment, expected left value");
-                }
+        if (t != P_LVALUE) 
+            return;
+        p_debug("lvalue\n");
+        while (test_lookahead(',')) {
+            t2 = lvalue_or_fcall();
+            if (t2 != P_LVALUE) {
+                parse_error("bad assignment, expected left value");
             }
-            token('=');
-            explist();
         }
-        else if (t == P_FCALL) {
-            p_debug("func call\n");
-        }
+        token('=');
+        explist();
+        return;
     }
-    else if (test_lookahead(TK_DO)) {
+    if (test_lookahead(TK_DO)) {
         token(TK_DO);
         block();
         token(TK_END);
+        return;
     }
-    else if (test_lookahead(TK_WHILE)) {
+    if (test_lookahead(TK_WHILE)) {
         while_stat();
+        return;
     }
-    else if (test_lookahead(TK_REPEAT)) {
+    if (test_lookahead(TK_REPEAT)) {
         repeat_stat();
+        return;
     }
-    else if (test_lookahead(TK_IF)) {
+    if (test_lookahead(TK_IF)) {
         if_stat();
+        return;
     }
-    else if (test_lookahead(TK_FOR)) {
+    if (test_lookahead(TK_FOR)) {
         for_stat();
+        return;
     }
-    else if (test_lookahead(TK_FUNCTION)) {
+    if (test_lookahead(TK_FUNCTION)) {
         func_stat();
+        return;
     }
-    else if (test_lookahead(TK_LOCAL)) {
+    if (test_lookahead(TK_LOCAL)) {
         local_stat();
+        return;
     }
-    else {
-        parse_error("bad statement");
-    }
+    parse_error("bad statement");
 }
 
 int Parser::test_stat() const {
@@ -208,6 +211,8 @@ void Parser::for_stat() {
     }
 }
 
+//	'local' 'function' NAME funcbody | 
+//	'local' namelist ('=' explist)? |
 void Parser::local_stat() {
     token(TK_LOCAL);
     if (test_lookahead(TK_FUNCTION)) {
