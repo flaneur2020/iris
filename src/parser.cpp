@@ -108,94 +108,22 @@ void Parser::stat(){
         token(TK_END);
     }
     else if (test_lookahead(TK_WHILE)) {
-        token(TK_WHILE);
-        exp();
-        token(TK_DO);
-        block();
-        token(TK_END);
+        while_stat();
     }
     else if (test_lookahead(TK_REPEAT)) {
-        token(TK_REPEAT);
-        block();
-        token(TK_UNTIL);
-        exp();
+        repeat_stat();
     }
-    // 'if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' | 
     else if (test_lookahead(TK_IF)) {
-        token(TK_IF);
-        exp();
-        token(TK_THEN);
-        block();
-        while(test_lookahead(TK_ELSE_IF)) {
-            token(TK_ELSE_IF);
-            exp();
-            token(TK_THEN);
-            block();
-        }
-        if (test_lookahead(TK_ELSE)) {
-            token(TK_ELSE);
-            block();
-        }
-        token(TK_END);
+        if_stat();
     }
-    // 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
-    // 'for' NAME (, namelist1)? 'in' explist 'do' block 'end' | 
     else if (test_lookahead(TK_FOR)) {
-        token(TK_FOR);
-        token(TK_NAME);
-        if (test_lookahead('=')) {
-            token('=');
-            exp();
-            token(',');
-            exp();
-            if (test_lookahead(',')) {
-                token(',');
-                exp();
-            }
-            token(TK_DO);
-            block();
-            token(TK_END);
-        }
-        else if (test_lookahead(',')) {
-            token(',');
-            namelist();
-            token(TK_IN);
-            explist();
-            token(TK_DO);
-            block();
-            token(TK_END);
-        }
-        else {
-            parse_error("bad for statment");
-        }
+        for_stat();
     }
-    // 'function' funcname funcbody | 
     else if (test_lookahead(TK_FUNCTION)) {
-        token(TK_FUNCTION);
-        func_name();
-        func_body();
+        func_stat();
     }
-    // 'local' 'function' NAME funcbody | 
-    // 'local' namelist ('=' explist)? ;
     else if (test_lookahead(TK_LOCAL)) {
-        token(TK_LOCAL);
-        if (test_lookahead(TK_FUNCTION)) {
-            token(TK_NAME);
-            func_body();
-        }
-        else if (test_namelist()) {
-            namelist();
-            if (test_lookahead('=')) {
-                token('=');
-                explist();
-            }
-        }
-        else {
-            parse_error("bad 'local' statement");
-        }
-    }
-    else if (test_exp()) {
-        parse_error("bad statement");
+        local_stat();
     }
     else {
         parse_error("bad statement");
@@ -229,9 +157,99 @@ int Parser::test_last_stat() const {
     return test_lookahead_n(TK_RETURN, TK_BREAK, 0);
 }
 
-/*
- * exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefix_exp | lvalue_or_fcall | tableconstructor | unop exp | ) (binop exp)* ;
- * */
+// if' exp 'then' block ('elseif' exp 'then' block)* ('else' block)? 'end' 
+void Parser::if_stat() {
+    token(TK_IF);
+    exp();
+    token(TK_THEN);
+    block();
+    while(test_lookahead(TK_ELSE_IF)) {
+        token(TK_ELSE_IF);
+        exp();
+        token(TK_THEN);
+        block();
+    }
+    if (test_lookahead(TK_ELSE)) {
+        token(TK_ELSE);
+        block();
+    }
+    token(TK_END);
+}
+
+// 'for' NAME '=' exp ',' exp (',' exp)? 'do' block 'end' | 
+// for' namelist 'in' explist 'do' block 'end' |
+void Parser::for_stat() {
+    token(TK_FOR);
+    token(TK_NAME);
+    if (test_lookahead('=')) {
+        token('=');
+        exp();
+        token(',');
+        exp();
+        if (test_lookahead(',')) {
+            token(',');
+            exp();
+        }
+        token(TK_DO);
+        block();
+        token(TK_END);
+    }
+    else if (test_lookahead(',')) {
+        token(',');
+        namelist();
+        token(TK_IN);
+        explist();
+        token(TK_DO);
+        block();
+        token(TK_END);
+    }
+    else {
+        parse_error("bad for statment");
+    }
+}
+
+void Parser::local_stat() {
+    token(TK_LOCAL);
+    if (test_lookahead(TK_FUNCTION)) {
+        token(TK_NAME);
+        func_body();
+    }
+    else if (test_namelist()) {
+        namelist();
+        if (test_lookahead('=')) {
+            token('=');
+            explist();
+        }
+    }
+    else {
+        parse_error("bad 'local' statement");
+    }
+}
+
+void Parser::func_stat() {
+    token(TK_FUNCTION);
+    func_name();
+    func_body();
+}
+
+void Parser::while_stat() {
+    token(TK_WHILE);
+    exp();
+    token(TK_DO);
+    block();
+    token(TK_END);
+}
+
+void Parser::repeat_stat() {
+    token(TK_REPEAT);
+    block();
+    token(TK_UNTIL);
+    exp();
+}
+
+/* ----------------------------------------------------------------------  */
+
+// exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefix_exp | lvalue_or_fcall | tableconstructor | unop exp | ) (binop exp)* ;
 void Parser::exp(){
     p_debug("> exp\n");
     if (test_lookahead_n(TK_NIL, TK_FALSE, TK_TRUE, TK_NUMBER, TK_STRING, TK_DOTS, 0)) {

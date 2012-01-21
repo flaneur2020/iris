@@ -25,6 +25,12 @@ private:
     void block();
     void stat();
     void last_stat();
+    void if_stat();
+    void while_stat();
+    void repeat_stat();
+    void for_stat();
+    void local_stat();
+    void func_stat();
     void assign_stat();
     void exp();
     void prefix_exp();
