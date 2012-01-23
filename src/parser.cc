@@ -66,7 +66,7 @@ void Parser::block() {
 
 /*
  * stat :  
- *	lvalue_or_fcall | -- assignment or func call
+ *	primary_exp | -- assignment or func call
  *	'do' block 'end' | 
  *	'while' exp 'do' block 'end' | 
  *	'repeat' block 'until' exp | 
@@ -85,13 +85,13 @@ void Parser::stat(){
     p_debug("> stat\n");
     p_debug("\t ahead(): %s\n", _lexer.lookahead().buf.c_str());
     // assignment or function call
-    if (test_lvalue_or_fcall()) {
-        t = lvalue_or_fcall();
+    if (test_primary_exp()) {
+        t = primary_exp();
         if (t != P_LVALUE) 
             return;
         p_debug("lvalue\n");
         while (test_lookahead(',')) {
-            t2 = lvalue_or_fcall();
+            t2 = primary_exp();
             if (t2 != P_LVALUE) {
                 parse_error("bad assignment, expected left value");
             }
@@ -134,7 +134,7 @@ void Parser::stat(){
 }
 
 int Parser::test_stat() const {
-    return test_lvalue_or_fcall()
+    return test_primary_exp()
         || test_lookahead_n(TK_DO, TK_WHILE, TK_REPEAT, TK_IF, TK_FOR, TK_FUNCTION, TK_LOCAL, 0)
         || test_exp();
 }
@@ -254,7 +254,7 @@ void Parser::repeat_stat() {
 
 /* ----------------------------------------------------------------------  */
 
-// exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefix_exp | lvalue_or_fcall | tableconstructor | unop exp | ) (binop exp)* ;
+// exp :  ('nil' | 'false' | 'true' | number | string | '...' | function | prefix_exp | primary_exp | tableconstructor | unop exp | ) (binop exp)* ;
 void Parser::exp(){
     p_debug("> exp\n");
     if (test_lookahead_n(TK_NIL, TK_FALSE, TK_TRUE, TK_NUMBER, TK_STRING, TK_DOTS, 0)) {
@@ -267,8 +267,8 @@ void Parser::exp(){
     else if (test_lookahead('(')) {
         prefix_exp();
     }
-    else if (test_lvalue_or_fcall()){
-        lvalue_or_fcall();
+    else if (test_primary_exp()){
+        primary_exp();
     }
     else if (test_table_constructor()) {
         table_constructor();
@@ -456,9 +456,9 @@ int Parser::test_field() const {
         || test_exp();
 }
 
-// lvalue_or_fcall: prefix_exp ( '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs )*
-int Parser::lvalue_or_fcall() {
-    p_debug("> lvalue_or_fcall\n");
+// primary_exp: prefix_exp ( '.' NAME | '[' exp ']' | ':' NAME funcargs | funcargs )*
+int Parser::primary_exp() {
+    p_debug("> primary_exp\n");
     int t = P_LVALUE;
 
     prefix_exp();
@@ -488,7 +488,7 @@ int Parser::lvalue_or_fcall() {
     return t;
 }
 
-int Parser::test_lvalue_or_fcall() const {
+int Parser::test_primary_exp() const {
     return test_prefix_exp();
 } 
 

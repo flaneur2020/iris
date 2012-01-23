@@ -34,7 +34,7 @@ private:
     void assign_stat();
     void exp();
     void prefix_exp();
-    int  lvalue_or_fcall(); // assignment or func call
+    int  primary_exp(); // assignment or func call
     void explist();
     void table_constructor();
     void field();
@@ -54,7 +54,7 @@ private:
     int test_explist() const;
     int test_parlist() const;
     int test_prefix_exp() const;
-    int test_lvalue_or_fcall() const;
+    int test_primary_exp() const;
     int test_table_constructor() const;
     int test_field() const;
     int test_func_body() const;
