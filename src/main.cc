@@ -29,7 +29,7 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-void iris::iris_debug(const char *fmt, ...) {
+void iris_debug(const char *fmt, ...) {
 #ifdef NDEBUG
     va_list vp;
     va_start(vp, fmt); 
