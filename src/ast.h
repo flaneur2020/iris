@@ -9,6 +9,16 @@ using namespace std;
 
 namespace iris {
 
+enum {
+    AST_SEQ,
+    AST_IF,
+    AST_WHILE,
+    AST_ASSIGN,
+    AST_OR,
+    AST_AND,
+    AST_EXP
+};
+
 struct AstNode {
     int type;
     int val;
@@ -30,6 +40,7 @@ class AstPool {
 public:
     AstPool()
         : _nodes() {};
+    ~AstPool();
 
     AstNode* new_node(int type);
     void free_nodes();

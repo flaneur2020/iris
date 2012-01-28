@@ -2,6 +2,7 @@
 #define PARSER_H
 
 #include "lexer.h"
+#include "ast.h"
 
 namespace iris {
 
@@ -12,6 +13,7 @@ class Parser {
     FILE *_file;
     const char *_file_name;
     Lexer _lexer;
+    AstPool _apool;
 
 public:
     Parser(FILE *file, const char *file_name);

@@ -9,6 +9,7 @@ Parser::Parser(FILE *file, const char *file_name)
     : _file(file)
     , _file_name(file_name)
     , _lexer(file, file_name)
+    , _apool()
 {
 }
 
